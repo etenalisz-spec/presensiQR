@@ -22,5 +22,8 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') === 'production' || isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
+
+        \Illuminate\Pagination\Paginator::defaultView('vendor.pagination.custom');
+        \Illuminate\Pagination\Paginator::defaultSimpleView('vendor.pagination.custom');
     }
 }

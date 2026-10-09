@@ -102,16 +102,22 @@
             flex: 1;
         }
 
-        /* Sidebar */
+        /* Sidebar (Sticky Desktop & Offcanvas Mobile) */
         aside.app-sidebar {
-            width: 250px;
+            width: 260px;
             background: var(--surface);
             border-right: 1px solid var(--border-line);
-            padding: 20px 12px;
+            padding: 20px 14px;
             display: flex;
             flex-direction: column;
             gap: 6px;
-            transition: all 0.2s ease;
+            position: sticky;
+            top: 56px;
+            height: calc(100vh - 56px);
+            overflow-y: auto;
+            flex-shrink: 0;
+            z-index: 40;
+            transition: transform 0.25s ease, opacity 0.25s ease;
         }
 
         .nav-item {
@@ -146,7 +152,8 @@
         /* Main Content */
         main.main-content {
             flex: 1;
-            padding: 24px clamp(16px, 3vw, 36px);
+            min-width: 0;
+            padding: 24px clamp(14px, 3vw, 36px);
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
@@ -377,18 +384,167 @@
         .alert-success { background: #E1F4EA; color: #0C7A52; border: 1px solid #B8E4CD; }
         .alert-danger { background: #FDEBE9; color: #C2352B; border: 1px solid #F8C3BD; }
 
+        /* Custom Clean Pagination Styles */
+        .unpam-pagination-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-line);
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .pagination-info span {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .unpam-pagination {
+            display: inline-flex;
+            align-items: center;
+            list-style: none;
+            gap: 6px;
+            padding: 0;
+            margin: 0;
+            flex-wrap: wrap;
+        }
+
+        .page-item {
+            display: inline-block;
+        }
+
+        .page-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 10px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--border-line);
+            background: #ffffff;
+            color: var(--text-main);
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .page-link:hover {
+            border-color: var(--unpam-blue);
+            color: var(--unpam-blue);
+            background: var(--unpam-light-blue);
+        }
+
+        .page-item.active .page-link {
+            background: var(--unpam-blue);
+            color: #ffffff;
+            border-color: var(--unpam-blue);
+            font-weight: 700;
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #F8FAFC;
+            border-color: var(--border-line);
+            color: var(--text-muted);
+        }
+
+        /* Fallback: Ensure any stray SVG pagination icons are never giant */
+        nav svg, .pagination svg, .unpam-pagination-container svg {
+            width: 16px !important;
+            height: 16px !important;
+            max-width: 16px !important;
+            max-height: 16px !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+
+        /* Backdrop overlay for mobile sidebar */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            z-index: 39;
+            backdrop-filter: blur(2px);
+        }
+
         @media (max-width: 768px) {
-            aside.app-sidebar {
-                display: none;
+            header.unpam-header {
+                padding: 12px 16px;
             }
-            aside.app-sidebar.open {
-                display: flex;
+            .header-brand h1 {
+                font-size: 14px;
+            }
+            .user-badge-btn span {
+                max-width: 110px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            aside.app-sidebar {
                 position: fixed;
-                top: 56px;
+                top: 54px;
                 left: 0;
                 bottom: 0;
+                width: 270px;
+                height: calc(100vh - 54px);
+                transform: translateX(-105%);
+                box-shadow: 10px 0 25px rgba(0,0,0,0.15);
                 z-index: 45;
-                box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+            }
+            aside.app-sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-backdrop.active {
+                display: block;
+            }
+
+            main.main-content {
+                padding: 16px 12px;
+            }
+
+            .card {
+                padding: 16px 14px;
+                border-radius: 12px;
+            }
+
+            .unpam-banner {
+                padding: 16px 18px;
+                border-radius: 12px;
+                margin-bottom: 16px;
+            }
+            .unpam-banner h2 {
+                font-size: 17px;
+            }
+
+            /* Responsive tables on mobile */
+            .table-responsive {
+                border: 1px solid var(--border-line);
+                border-radius: 10px;
+                -webkit-overflow-scrolling: touch;
+            }
+            table.unpam-table {
+                min-width: 580px;
+            }
+
+            .unpam-pagination-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            .unpam-pagination {
+                justify-content: center;
             }
         }
     </style>
@@ -398,7 +554,7 @@
     <!-- Header UNPAM (Sesuai Screenshot 1 & 2) -->
     <header class="unpam-header">
         <div class="header-brand">
-            <button class="menu-toggle-btn" onclick="document.querySelector('.app-sidebar').classList.toggle('open')">
+            <button class="menu-toggle-btn" onclick="toggleSidebar()" aria-label="Menu Navigasi">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
             </button>
             <h1>UNIVERSITAS PAMULANG</h1>
@@ -509,6 +665,7 @@
             </form>
         </aside>
         @endauth
+        <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
 
         <main class="main-content">
             @if(session('success'))
@@ -528,6 +685,16 @@
         </main>
     </div>
 
+    <script>
+        function toggleSidebar(forceState) {
+            const sidebar = document.querySelector('.app-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (!sidebar) return;
+            const isOpen = forceState !== undefined ? forceState : !sidebar.classList.contains('open');
+            sidebar.classList.toggle('open', isOpen);
+            if (backdrop) backdrop.classList.toggle('active', isOpen);
+        }
+    </script>
     @stack('scripts')
 </body>
 </html>

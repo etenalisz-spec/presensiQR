@@ -192,4 +192,12 @@ class PresensiSystemTest extends TestCase
         $response->assertSee('DASHBOARD MAHASISWA');
         $response->assertSee('Jumlah Kehadiran');
     }
+
+    public function test_admin_mahasiswa_pagination_clean_rendering()
+    {
+        $admin = User::where('username', 'admin')->first();
+        $response = $this->actingAs($admin)->get('/admin/mahasiswa');
+        $response->assertStatus(200);
+        $response->assertDontSee('w-5 h-5');
+    }
 }
