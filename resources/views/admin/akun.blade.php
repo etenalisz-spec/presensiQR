@@ -115,7 +115,7 @@
     </div>
 
     <div style="margin-top: 20px">
-        {{ $usersList->withQueryString()->links() }}
+        {{ $usersList->withQueryString()->links('pagination.custom') }}
     </div>
 </div>
 

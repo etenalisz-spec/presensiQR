@@ -90,7 +90,7 @@
     </div>
 
     <div style="margin-top: 20px">
-        {{ $mahasiswaList->links() }}
+        {{ $mahasiswaList->links('pagination.custom') }}
     </div>
 </div>
 

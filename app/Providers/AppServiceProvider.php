@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
             \Illuminate\Support\Facades\URL::forceScheme('https');
         }
 
-        \Illuminate\Pagination\Paginator::defaultView('vendor.pagination.custom');
-        \Illuminate\Pagination\Paginator::defaultSimpleView('vendor.pagination.custom');
+        \Illuminate\Pagination\Paginator::defaultView('pagination.custom');
+        \Illuminate\Pagination\Paginator::defaultSimpleView('pagination.custom');
     }
 }
