@@ -1,55 +1,36 @@
 @echo off
-title Upload Presensi UNPAM ke GitHub
+title Push Update Presensi UNPAM ke GitHub
 echo ========================================================
-echo    PANDUAN OTOMATIS UPLOAD PROYEK KE GITHUB
+echo    UPLOAD UPDATE PROYEK KE GITHUB (presensiQR)
 echo ========================================================
 echo.
 
 set PATH=C:\laragon\bin\git\cmd;%PATH%
-
 cd /d "%~dp0"
 
-echo [1/4] Memeriksa status Git...
-git init
-git config --global user.name "Pengembang UNPAM"
-git config --global user.email "developer@unpam.ac.id"
-
-echo.
-echo [2/4] Menambahkan seluruh file proyek...
-git add .
-git commit -m "feat: initial release presensi unpam"
-
-echo.
-echo ========================================================
-echo Masukkan URL Repositori GitHub baru Anda
-echo Contoh: https://github.com/username/nama-repo.git
-echo ========================================================
-set /p REPO_URL="URL GitHub: "
-
-if "%REPO_URL%"=="" (
-    echo [ERROR] URL GitHub tidak boleh kosong!
-    pause
-    exit /b
+echo [1/3] Memeriksa status Git...
+git remote get-url origin >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    git remote add origin https://github.com/etenalisz-spec/presensiQR.git
 )
 
-git remote remove origin >nul 2>&1
-git remote add origin %REPO_URL%
-git branch -M main
+echo [2/3] Mengemas seluruh perubahan...
+git add .
+git commit -m "fix: update composer.lock, trust proxies and enable tidb cloud ssl"
 
 echo.
-echo [3/4] Mengunggah (push) ke GitHub...
+echo [3/3] Mengunggah (push) ke GitHub...
 git push -u origin main
 
 if %ERRORLEVEL% EQU 0 (
     echo.
     echo ========================================================
-    echo  BERHASIL! Proyek Anda sudah terunggah ke GitHub!
+    echo  BERHASIL! Update sudah terunggah ke GitHub!
     echo ========================================================
 ) else (
     echo.
     echo ========================================================
-    echo  Jika gagal autentikasi, gunakan GitHub Desktop 
-    echo  atau buat Personal Access Token di github.com/settings/tokens
+    echo  Jika diminta login / token, silakan masukkan kredensial GitHub Anda.
     echo ========================================================
 )
 
