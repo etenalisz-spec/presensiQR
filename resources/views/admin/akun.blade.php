@@ -68,7 +68,7 @@
                             @endif
                         @elseif($u->role === 'dosen')
                             @php
-                                $mks = $u->dosen?->jadwalKuliahs->pluck('mataKuliah.nama_mk')->unique() ?? collect();
+                                $mks = $u->dosen && $u->dosen->jadwalKuliahs ? $u->dosen->jadwalKuliahs->pluck('mataKuliah.nama_mk')->filter()->unique() : collect();
                             @endphp
                             @if($mks->count() > 0)
                                 <small style="color: #334155; font-weight: 600">{{ $mks->first() }}</small>
