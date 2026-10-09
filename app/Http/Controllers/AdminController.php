@@ -12,6 +12,7 @@ use App\Models\MataKuliah;
 use App\Models\JadwalKuliah;
 use App\Models\Pertemuan;
 use App\Models\Presensi;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class AdminController extends Controller
@@ -569,7 +570,7 @@ class AdminController extends Controller
         return back()->with('success', 'Jadwal kuliah berhasil dihapus.');
     }
 
-    // --- FITUR DRAG AND DROP BATCH IMPORT (JSON/CSV) ---
+    // --- FITUR DRAG AND DROP BATCH IMPORT (JSON/CSV) CEPAT & TANGGUH ---
     public function importBatch(Request $request, $entity)
     {
         $data = $request->input('data');
@@ -578,80 +579,239 @@ class AdminController extends Controller
         }
 
         if (!is_array($data) || empty($data)) {
-            return response()->json(['success' => false, 'message' => 'Format file atau data tidak valid.'], 400);
+            return response()->json(['success' => false, 'message' => 'Format file atau data tidak valid atau kosong.'], 400);
         }
 
         $count = 0;
-        switch ($entity) {
-            case 'mahasiswa':
-                foreach ($data as $item) {
-                    if (empty($item['nim']) || empty($item['nama_lengkap'])) continue;
-                    $kelas = Kelas::where('nama_kelas', $item['kelas'] ?? '')->orWhere('kode_kelas', $item['kelas'] ?? '')->first() ?? Kelas::first();
-                    $user = User::firstOrCreate(['username' => $item['nim']], [
-                        'name' => $item['nama_lengkap'],
-                        'email' => $item['email'] ?? strtolower($item['nim']).'@mhs.unpam.ac.id',
-                        'password' => Hash::make($item['password'] ?? 'mhs12345'),
-                        'role' => 'mahasiswa',
-                    ]);
-                    Mahasiswa::firstOrCreate(['nim' => $item['nim']], [
-                        'user_id' => $user->id,
-                        'kelas_id' => $kelas->id,
-                        'nama_lengkap' => $item['nama_lengkap'],
-                        'no_telp' => $item['no_telp'] ?? $item['no_hp'] ?? $item['telepon'] ?? $item['hp'] ?? ('08' . rand(1111111111, 9999999999)),
-                        'status' => 'Aktif',
-                    ]);
-                    $count++;
-                }
-                break;
+        $skipped = 0;
 
-            case 'dosen':
-                foreach ($data as $item) {
-                    if (empty($item['nidn']) || empty($item['nama_lengkap'])) continue;
-                    $user = User::firstOrCreate(['username' => $item['nidn']], [
-                        'name' => $item['nama_lengkap'],
-                        'email' => $item['email'] ?? strtolower(explode(' ', $item['nama_lengkap'])[0]).'@unpam.ac.id',
-                        'password' => Hash::make($item['password'] ?? 'dosen123'),
-                        'role' => 'dosen',
-                    ]);
-                    Dosen::firstOrCreate(['nidn' => $item['nidn']], [
-                        'user_id' => $user->id,
-                        'nama_lengkap' => $item['nama_lengkap'],
-                        'gelar' => $item['gelar'] ?? null,
-                        'no_telp' => $item['no_telp'] ?? null,
-                    ]);
-                    $count++;
-                }
-                break;
+        try {
+            DB::beginTransaction();
 
-            case 'matakuliah':
-                foreach ($data as $item) {
-                    if (empty($item['kode_mk']) || empty($item['nama_mk'])) continue;
-                    MataKuliah::firstOrCreate(['kode_mk' => $item['kode_mk']], [
-                        'nama_mk' => $item['nama_mk'],
-                        'sks' => $item['sks'] ?? 3,
-                        'semester' => $item['semester'] ?? 5,
-                    ]);
-                    $count++;
-                }
-                break;
+            switch ($entity) {
+                case 'mahasiswa':
+                    $defaultPasswordHash = Hash::make('mhs12345');
+                    $allKelas = Kelas::all();
+                    $defaultKelas = $allKelas->first();
 
-            case 'kelas':
-                foreach ($data as $item) {
-                    if (empty($item['kode_kelas'])) continue;
-                    Kelas::firstOrCreate(['kode_kelas' => $item['kode_kelas']], [
-                        'nama_kelas' => $item['nama_kelas'] ?? $item['kode_kelas'],
-                        'prodi' => $item['prodi'] ?? 'Sistem Informasi',
-                        'semester' => $item['semester'] ?? 5,
-                        'tahun_ajaran' => $item['tahun_ajaran'] ?? 'GANJIL 2026/2027',
-                    ]);
-                    $count++;
-                }
-                break;
+                    $nims = [];
+                    foreach ($data as $item) {
+                        $nim = trim($item['nim'] ?? $item['username'] ?? $item['no_induk'] ?? '');
+                        if ($nim !== '') $nims[] = $nim;
+                    }
+
+                    $existingUsers = User::whereIn('username', $nims)->get()->keyBy('username');
+                    $existingMahasiswas = Mahasiswa::whereIn('nim', $nims)->get()->keyBy('nim');
+
+                    foreach ($data as $item) {
+                        $nim = trim($item['nim'] ?? $item['username'] ?? $item['no_induk'] ?? '');
+                        $nama = trim($item['nama_lengkap'] ?? $item['nama'] ?? $item['name'] ?? $item['nama_mahasiswa'] ?? '');
+                        if (empty($nim) || empty($nama)) {
+                            $skipped++;
+                            continue;
+                        }
+
+                        $rawKelas = trim($item['kelas'] ?? $item['nama_kelas'] ?? $item['kode_kelas'] ?? $item['rombel'] ?? '');
+                        $kelas = $allKelas->first(function ($k) use ($rawKelas) {
+                            return strcasecmp($k->nama_kelas, $rawKelas) === 0 || strcasecmp($k->kode_kelas, $rawKelas) === 0;
+                        }) ?? $defaultKelas;
+
+                        $email = trim($item['email'] ?? $item['mail'] ?? '');
+                        if (empty($email)) {
+                            $email = strtolower($nim) . '@mhs.unpam.ac.id';
+                        }
+
+                        $noTelp = trim($item['no_telp'] ?? $item['no_hp'] ?? $item['telepon'] ?? $item['hp'] ?? $item['whatsapp'] ?? $item['wa'] ?? '');
+                        if (empty($noTelp)) {
+                            $noTelp = '081' . rand(100000000, 999999999);
+                        }
+
+                        // Buat User Akun
+                        $user = $existingUsers->get($nim);
+                        if (!$user) {
+                            $emailConflict = User::where('email', $email)->exists();
+                            if ($emailConflict) {
+                                $email = strtolower($nim) . '.' . rand(10, 99) . '@mhs.unpam.ac.id';
+                            }
+
+                            $user = User::create([
+                                'name' => $nama,
+                                'username' => $nim,
+                                'email' => $email,
+                                'password' => !empty($item['password']) ? Hash::make($item['password']) : $defaultPasswordHash,
+                                'role' => 'mahasiswa',
+                            ]);
+                            $existingUsers->put($nim, $user);
+                        }
+
+                        // Buat Data Mahasiswa
+                        $mhs = $existingMahasiswas->get($nim);
+                        if (!$mhs) {
+                            $mhs = Mahasiswa::create([
+                                'user_id' => $user->id,
+                                'kelas_id' => $kelas ? $kelas->id : 1,
+                                'nim' => $nim,
+                                'nama_lengkap' => $nama,
+                                'no_telp' => $noTelp,
+                                'status' => 'Aktif',
+                            ]);
+                            $existingMahasiswas->put($nim, $mhs);
+
+                            // Hubungkan ke sesi presensi kelas
+                            if ($kelas) {
+                                $jadwals = JadwalKuliah::where('kelas_id', $kelas->id)->with('pertemuans')->get();
+                                foreach ($jadwals as $jadwal) {
+                                    foreach ($jadwal->pertemuans as $ptm) {
+                                        Presensi::firstOrCreate([
+                                            'pertemuan_id' => $ptm->id,
+                                            'mahasiswa_id' => $mhs->id,
+                                        ], [
+                                            'status' => 'Belum Presensi',
+                                        ]);
+                                    }
+                                }
+                            }
+                            $count++;
+                        } else {
+                            $skipped++;
+                        }
+                    }
+                    break;
+
+                case 'dosen':
+                    $defaultPasswordHash = Hash::make('dosen123');
+                    $nidns = [];
+                    foreach ($data as $item) {
+                        $nidn = trim($item['nidn'] ?? $item['username'] ?? $item['nip'] ?? '');
+                        if ($nidn !== '') $nidns[] = $nidn;
+                    }
+
+                    $existingUsers = User::whereIn('username', $nidns)->get()->keyBy('username');
+                    $existingDosens = Dosen::whereIn('nidn', $nidns)->get()->keyBy('nidn');
+
+                    foreach ($data as $item) {
+                        $nidn = trim($item['nidn'] ?? $item['username'] ?? $item['nip'] ?? '');
+                        $nama = trim($item['nama_lengkap'] ?? $item['nama'] ?? $item['nama_dosen'] ?? '');
+                        if (empty($nidn) || empty($nama)) {
+                            $skipped++;
+                            continue;
+                        }
+
+                        $user = $existingUsers->get($nidn);
+                        if (!$user) {
+                            $firstWord = strtolower(explode(' ', $nama)[0]);
+                            $email = trim($item['email'] ?? $firstWord . '.' . $nidn . '@unpam.ac.id');
+                            if (User::where('email', $email)->exists()) {
+                                $email = $firstWord . '.' . rand(10, 99) . '@unpam.ac.id';
+                            }
+
+                            $user = User::create([
+                                'name' => $nama,
+                                'username' => $nidn,
+                                'email' => $email,
+                                'password' => !empty($item['password']) ? Hash::make($item['password']) : $defaultPasswordHash,
+                                'role' => 'dosen',
+                            ]);
+                            $existingUsers->put($nidn, $user);
+                        }
+
+                        $dosen = $existingDosens->get($nidn);
+                        if (!$dosen) {
+                            $dosen = Dosen::create([
+                                'user_id' => $user->id,
+                                'nidn' => $nidn,
+                                'nama_lengkap' => $nama,
+                                'gelar' => trim($item['gelar'] ?? ''),
+                                'no_telp' => trim($item['no_telp'] ?? $item['no_hp'] ?? $item['telepon'] ?? ''),
+                            ]);
+                            $existingDosens->put($nidn, $dosen);
+                            $count++;
+                        } else {
+                            $skipped++;
+                        }
+                    }
+                    break;
+
+                case 'matakuliah':
+                    $kodes = [];
+                    foreach ($data as $item) {
+                        $kd = trim($item['kode_mk'] ?? $item['kode'] ?? $item['kode_matakuliah'] ?? '');
+                        if ($kd !== '') $kodes[] = $kd;
+                    }
+                    $existingMks = MataKuliah::whereIn('kode_mk', $kodes)->pluck('kode_mk')->toArray();
+
+                    foreach ($data as $item) {
+                        $kode = trim($item['kode_mk'] ?? $item['kode'] ?? $item['kode_matakuliah'] ?? '');
+                        $nama = trim($item['nama_mk'] ?? $item['nama'] ?? $item['mata_kuliah'] ?? '');
+                        if (empty($kode) || empty($nama)) {
+                            $skipped++;
+                            continue;
+                        }
+
+                        if (!in_array($kode, $existingMks)) {
+                            MataKuliah::create([
+                                'kode_mk' => $kode,
+                                'nama_mk' => $nama,
+                                'sks' => intval($item['sks'] ?? 3),
+                                'semester' => intval($item['semester'] ?? 5),
+                            ]);
+                            $existingMks[] = $kode;
+                            $count++;
+                        } else {
+                            $skipped++;
+                        }
+                    }
+                    break;
+
+                case 'kelas':
+                    $kodes = [];
+                    foreach ($data as $item) {
+                        $kd = trim($item['kode_kelas'] ?? $item['kode'] ?? '');
+                        if ($kd !== '') $kodes[] = $kd;
+                    }
+                    $existingKelas = Kelas::whereIn('kode_kelas', $kodes)->pluck('kode_kelas')->toArray();
+
+                    foreach ($data as $item) {
+                        $kode = trim($item['kode_kelas'] ?? $item['kode'] ?? $item['nama_kelas'] ?? '');
+                        if (empty($kode)) {
+                            $skipped++;
+                            continue;
+                        }
+
+                        if (!in_array($kode, $existingKelas)) {
+                            Kelas::create([
+                                'kode_kelas' => $kode,
+                                'nama_kelas' => trim($item['nama_kelas'] ?? $kode),
+                                'prodi' => trim($item['prodi'] ?? 'Sistem Informasi'),
+                                'semester' => intval($item['semester'] ?? 5),
+                                'tahun_ajaran' => trim($item['tahun_ajaran'] ?? 'GANJIL 2026/2027'),
+                            ]);
+                            $existingKelas[] = $kode;
+                            $count++;
+                        } else {
+                            $skipped++;
+                        }
+                    }
+                    break;
+            }
+
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses batch import: ' . $e->getMessage()
+            ], 500);
+        }
+
+        $msg = "Berhasil menambahkan $count data $entity baru!";
+        if ($skipped > 0) {
+            $msg .= " ($skipped data dilewati karena sudah ada atau kolom tidak lengkap)";
         }
 
         return response()->json([
             'success' => true,
-            'message' => "Berhasil menambahkan $count data $entity secara otomatis via drag and drop!"
+            'message' => $msg
         ]);
     }
 

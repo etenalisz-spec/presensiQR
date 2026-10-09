@@ -264,7 +264,62 @@
         if (fileInput.files.length) handleFile(fileInput.files[0]);
     };
 
+    function parseCSV(text) {
+        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+        let firstLine = text.split(/\r\n|\n|\r/)[0] || '';
+        let delimiter = ',';
+        let semiCount = (firstLine.match(/;/g) || []).length;
+        let commaCount = (firstLine.match(/,/g) || []).length;
+        let tabCount = (firstLine.match(/\t/g) || []).length;
+        if (semiCount > commaCount && semiCount > tabCount) delimiter = ';';
+        else if (tabCount > commaCount && tabCount > semiCount) delimiter = '\t';
+
+        let lines = text.split(/\r\n|\n|\r/).filter(l => l.trim().length > 0);
+        if (lines.length < 2) return [];
+
+        function splitRow(row) {
+            let pattern = new RegExp(
+                '(\\' + delimiter + '|\\r?\\n|\\r|^)' +
+                '(?:"([^"]*(?:""[^"]*)*)"|([^"\\' + delimiter + '\\r\\n]*))',
+                'gi'
+            );
+            let rowData = [];
+            let match = null;
+            while ((match = pattern.exec(row))) {
+                let value = match[2] ? match[2].replace(/""/g, '"') : match[3];
+                rowData.push((value || '').trim());
+            }
+            return rowData;
+        }
+
+        let rawHeaders = splitRow(lines[0]);
+        let cleanHeaders = rawHeaders.map(h => 
+            h.toLowerCase()
+             .replace(/[\ufeff"\']/g, '')
+             .replace(/\s+/g, '_')
+             .replace(/[^a-z0-9_]/g, '')
+             .trim()
+        );
+
+        let result = [];
+        for (let i = 1; i < lines.length; i++) {
+            let rowCols = splitRow(lines[i]);
+            if (rowCols.length === 0 || rowCols.every(c => c === '')) continue;
+            let obj = {};
+            cleanHeaders.forEach((h, idx) => {
+                if (h) obj[h] = rowCols[idx] !== undefined ? rowCols[idx] : '';
+            });
+            result.push(obj);
+        }
+        return result;
+    }
+
     function handleFile(file) {
+        const st = document.getElementById('drop-status');
+        st.style.display = 'block';
+        st.className = 'alert alert-info';
+        st.textContent = 'Membaca dan memproses file, mohon tunggu sebentar...';
+
         const reader = new FileReader();
         reader.onload = async (e) => {
             let content = e.target.result;
@@ -273,15 +328,16 @@
                 if (file.name.endsWith('.json')) {
                     payload = JSON.parse(content);
                 } else {
-                    let lines = content.split('\n').filter(l => l.trim().length);
-                    let headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-                    for (let i = 1; i < lines.length; i++) {
-                        let cols = lines[i].split(',').map(c => c.trim());
-                        let obj = {};
-                        headers.forEach((h, idx) => obj[h] = cols[idx]);
-                        payload.push(obj);
-                    }
+                    payload = parseCSV(content);
                 }
+
+                if (!payload || payload.length === 0) {
+                    st.className = 'alert alert-danger';
+                    st.textContent = 'File kosong atau baris data tidak terbaca.';
+                    return;
+                }
+
+                st.textContent = `Mengirim ${payload.length} data ke server...`;
 
                 const res = await fetch("/admin/import/" + activeEntity, {
                     method: 'POST',
@@ -292,13 +348,12 @@
                     body: JSON.stringify({ data: payload })
                 });
                 const resData = await res.json();
-                const st = document.getElementById('drop-status');
-                st.style.display = 'block';
                 st.className = res.ok ? 'alert alert-success' : 'alert alert-danger';
                 st.textContent = resData.message;
                 if (res.ok) setTimeout(() => location.reload(), 1500);
             } catch (err) {
-                alert("Gagal membaca file: format file tidak sesuai.");
+                st.className = 'alert alert-danger';
+                st.textContent = 'Gagal memproses file: ' + err.message;
             }
         };
         reader.readAsText(file);
