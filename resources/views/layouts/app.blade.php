@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Sistem Presensi QR' }} - Universitas Pamulang</title>
 
@@ -28,6 +29,13 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            color-scheme: light;
+        }
+        html {
+            color-scheme: light;
+            background-color: var(--bg-body);
+        }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-body);
@@ -35,6 +43,7 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            color-scheme: light;
         }
 
         /* Top Header (Sesuai Screenshot UNPAM) */

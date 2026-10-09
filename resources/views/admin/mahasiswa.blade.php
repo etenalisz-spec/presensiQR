@@ -50,10 +50,10 @@
                     <td style="font-weight: 700; color: #0284C7">{{ $mhs->nim }}</td>
                     <td style="font-weight: 600">{{ $mhs->nama_lengkap }}</td>
                     <td>
-                        <span class="badge badge-info">{{ $mhs->kelas->nama_kelas }}</span>
+                        <span class="badge badge-info">{{ $mhs->kelas?->nama_kelas ?? 'Belum Ditentukan' }}</span>
                     </td>
                     <td>
-                        @if($mhs->no_telp)
+                        @if(!empty($mhs->no_telp))
                             <a href="https://wa.me/{{ preg_replace('/^0/', '62', preg_replace('/[^0-9]/', '', $mhs->no_telp)) }}" target="_blank" style="color: #059669; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 4px">
                                 💬 {{ $mhs->no_telp }}
                             </a>
@@ -61,12 +61,12 @@
                             <span style="color: var(--text-muted)">-</span>
                         @endif
                     </td>
-                    <td>{{ $mhs->user->email }}</td>
+                    <td>{{ $mhs->user?->email ?? ($mhs->email ?? '-') }}</td>
                     <td>
                         <span class="badge {{ $mhs->status === 'Aktif' ? 'badge-success' : 'badge-warning' }}">{{ $mhs->status }}</span>
                     </td>
                     <td style="text-align: center">
-                        <button type="button" class="btn btn-outline btn-sm" onclick="openEditMhsModal({{ $mhs->id }}, '{{ addslashes($mhs->nama_lengkap) }}', {{ $mhs->kelas_id }}, '{{ $mhs->status }}', '{{ addslashes($mhs->no_telp ?? '') }}', '{{ addslashes($mhs->user->email ?? '') }}')">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="openEditMhsModal({{ $mhs->id }}, '{{ addslashes($mhs->nama_lengkap) }}', {{ $mhs->kelas_id ?? 'null' }}, '{{ $mhs->status }}', '{{ addslashes($mhs->no_telp ?? '') }}', '{{ addslashes($mhs->user?->email ?? '') }}')">
                             Edit
                         </button>
                         <form action="{{ route('admin.mahasiswa.delete', $mhs->id) }}" method="POST" style="display: inline" onsubmit="return confirm('Hapus mahasiswa ini beserta akunnya?')">

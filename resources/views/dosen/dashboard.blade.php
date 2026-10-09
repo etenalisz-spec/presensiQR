@@ -49,13 +49,13 @@
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; margin-bottom: 24px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 24px">
     <!-- Chart Persentase Kehadiran Kelas yang Diampu -->
     <div class="card" style="margin: 0">
         <h3 class="card-title">Persentase Kehadiran Keseluruhan</h3>
         <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px">Akumulasi seluruh kelas dan mata kuliah yang Anda ampu.</p>
-        <div style="display: flex; align-items: center; gap: 24px">
-            <div style="width: 160px; height: 160px; position: relative">
+        <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 24px">
+            <div style="width: 150px; height: 150px; position: relative; flex-shrink: 0">
                 <canvas id="dosenChart"></canvas>
             </div>
             <div>

@@ -70,9 +70,9 @@
     </div>
 
     @if($selectedKelas && !empty($chartData))
-    <div style="display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; align-items: center">
+    <div class="chart-layout-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; align-items: center">
         <!-- Canvas Chart.js -->
-        <div style="max-height: 280px; position: relative">
+        <div style="height: 240px; position: relative">
             <canvas id="presensiChart"></canvas>
         </div>
 

@@ -32,7 +32,7 @@
 </div>
 
 <!-- 3 Kartu Metrik Kehadiran Riil -->
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px">
     <div class="card" style="margin: 0; padding: 20px">
         <span style="font-size: 12px; font-weight: 700; color: #0C7A52; text-transform: uppercase">Jumlah Kehadiran</span>
         <div style="font-size: 32px; font-weight: 800; color: #0C7A52; margin-top: 6px">{{ $totalHadir }}</div>
