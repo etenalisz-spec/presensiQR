@@ -3,6 +3,7 @@
 .env.backup
 vendor
 node_modules
+public/hot
 tests
 storage/*.key
 storage/framework/cache/*
