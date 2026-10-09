@@ -9,6 +9,7 @@
       "maxDuration": 15
     }
   },
+  "regions": ["sin1"],
   "routes": [
     {
       "src": "/build/(.*)",
