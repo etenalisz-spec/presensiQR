@@ -16,7 +16,7 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo [2/3] Mengemas seluruh perubahan...
 git add .
-git commit -m "fix: update composer.lock, trust proxies and enable tidb cloud ssl"
+git commit -m "perf: optimize batch drag-and-drop import and CSV parser" >nul 2>&1
 
 echo.
 echo [3/3] Mengunggah (push) ke GitHub...
