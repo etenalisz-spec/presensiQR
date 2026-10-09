@@ -91,7 +91,7 @@
                 <div class="alert-error">{{ $errors->first('login') }}</div>
             @endif
 
-            <form action="{{ route('login') }}" method="POST">
+            <form action="/login" method="POST">
                 @csrf
                 <div class="form-group">
                     <label for="username">NIM / NIDN / Username</label>
