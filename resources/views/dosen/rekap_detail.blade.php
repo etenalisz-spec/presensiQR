@@ -102,7 +102,7 @@
                     <td style="font-weight: 700; white-space: nowrap; position: sticky; left: 135px; background: #fff; z-index: 2">{{ $rm['mahasiswa']->nama_lengkap }}</td>
                     @foreach($jadwal->pertemuans as $ptm)
                         @php
-                            $prs = $rm['presensis'][$ptm.id] ?? null;
+                            $prs = $rm['presensis'][$ptm->id] ?? null;
                             $st = $prs ? $prs->status : null;
                         @endphp
                         <td style="text-align: center; padding: 6px 2px">
