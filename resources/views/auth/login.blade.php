@@ -111,33 +111,10 @@
                 </div>
                 <button type="submit" class="btn-submit">Masuk ke Sistem</button>
             </form>
-
-            <div style="margin-top: 22px; padding: 14px; background: #F8FAFC; border-radius: 12px; border: 1px dashed var(--border-line); font-size: 12px">
-                <div style="font-weight: 700; color: #475569; margin-bottom: 8px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px">Akun Demo Siap Pakai (Klik untuk Isi Cepat):</div>
-                <div style="display: flex; flex-direction: column; gap: 6px">
-                    <button type="button" onclick="fillLogin('admin', 'admin123')" style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 12px">
-                        <div><strong style="color: #0284C7">Admin:</strong> <code>admin</code></div>
-                        <div style="color: #64748B">Password: <strong>admin123</strong></div>
-                    </button>
-                    <button type="button" onclick="fillLogin('dosen', 'dosen123')" style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 12px">
-                        <div><strong style="color: #0284C7">Dosen:</strong> <code>dosen</code></div>
-                        <div style="color: #64748B">Password: <strong>dosen123</strong></div>
-                    </button>
-                    <button type="button" onclick="fillLogin('2211001', 'mhs12345')" style="display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid #E2E8F0; padding: 8px 12px; border-radius: 8px; cursor: pointer; text-align: left; font-size: 12px">
-                        <div><strong style="color: #0284C7">Mahasiswa:</strong> <code>2211001</code></div>
-                        <div style="color: #64748B">Password: <strong>mhs12345</strong></div>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 
     <script>
-        function fillLogin(user, pwd) {
-            document.getElementById('username').value = user;
-            document.getElementById('password').value = pwd;
-        }
-
         function togglePasswordVisibility() {
             const pwdInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eye-icon');
