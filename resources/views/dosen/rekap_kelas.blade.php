@@ -2,15 +2,15 @@
 
 @section('content')
 <div class="unpam-banner">
-    <h2>REKAP PRESENSI KELAS</h2>
-    <p>Langkah 2: Pilih Kelas &bull; {{ $mataKuliah->nama_mk }} ({{ $mataKuliah->kode_mk }})</p>
+    <h2>REKAP & LEMBAR PRESENSI RUANG KELAS</h2>
+    <p>Langkah 2: Pilih Ruang Kelas &bull; {{ $mataKuliah->nama_mk }} ({{ $mataKuliah->kode_mk }})</p>
 </div>
 
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px">
         <div>
-            <h3 class="card-title" style="margin: 0">Pilih Kelas Rekap Presensi</h3>
-            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px">Klik kelas untuk melihat chart dan persentase kehadiran masing-masing mahasiswa.</p>
+            <h3 class="card-title" style="margin: 0">Pilih Ruang Kelas Presensi</h3>
+            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px">Klik ruang kelas untuk melihat lembar presensi mahasiswa menyamping (pertemuan 1-14), chart, dan cetak laporan.</p>
         </div>
         <a href="{{ route('dosen.rekap.matakuliah') }}" class="btn btn-outline btn-sm">
             &larr; Kembali ke Daftar MK
@@ -26,7 +26,7 @@
                     Ruang: {{ $jadwal->ruang }} &bull; {{ $jadwal->hari }}, {{ substr($jadwal->jam_mulai, 0, 5) }} WIB
                 </p>
                 <a href="{{ route('dosen.rekap.detail', $jadwal->id) }}" class="btn btn-primary btn-block">
-                    Buka Rekap & Chart Kelas
+                    Lihat Lembar Presensi & Rekap
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
             </div>

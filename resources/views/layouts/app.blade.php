@@ -337,6 +337,7 @@
             place-items: center;
             z-index: 100;
             padding: 16px;
+            overflow-y: auto;
         }
 
         .modal-box {
@@ -345,7 +346,11 @@
             padding: 24px;
             width: 100%;
             max-width: 500px;
+            max-height: calc(100vh - 32px);
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            margin: auto;
         }
 
         /* Forms */

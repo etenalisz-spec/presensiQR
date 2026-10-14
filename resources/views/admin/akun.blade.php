@@ -121,61 +121,76 @@
 
 <!-- Modal 1: Buat Akun Dosen Baru -->
 <div id="modal-buat-dosen" class="modal-backdrop" style="display: none">
-    <div class="modal-box" style="max-width: 550px">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Buat Akun Dosen Baru</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px">Data akun dosen akan otomatis terdaftar dan dapat digunakan untuk login.</p>
+    <div class="modal-box" style="max-width: 600px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Buat Akun Dosen Baru</h3>
+                <button type="button" onclick="document.getElementById('modal-buat-dosen').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Data akun dosen akan otomatis terdaftar dan dapat digunakan untuk login.</p>
+        </div>
 
-        <form action="{{ route('admin.dosen.store') }}" method="POST">
+        <form action="{{ route('admin.dosen.store') }}" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
-            <div class="form-group">
-                <label>NIDN (Username Login Dosen)</label>
-                <input type="text" name="nidn" class="form-control" placeholder="Contoh: 0412058005" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Lengkap dan Gelar</label>
-                <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Gusmayeni, S.Kom., M.Kom." required>
-            </div>
-            <div class="form-group">
-                <label>Gelar Khusus</label>
-                <input type="text" name="gelar" class="form-control" placeholder="Contoh: M.Kom.">
-            </div>
-            <div class="form-group">
-                <label>Password Akun Dosen</label>
-                <input type="password" name="password" class="form-control" value="dosen123" required>
-            </div>
-            <div class="form-group">
-                <label>No. Telepon / WhatsApp</label>
-                <input type="text" name="no_telp" class="form-control" placeholder="Contoh: 081234567890">
-            </div>
-            <div class="form-group">
-                <label>Email (Opsional)</label>
-                <input type="email" name="email" class="form-control" placeholder="default: nama@unpam.ac.id">
-            </div>
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>NIDN (Username Login Dosen) <span style="color: red">*</span></label>
+                        <input type="text" name="nidn" class="form-control" placeholder="Contoh: 0412058005" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Lengkap dan Gelar <span style="color: red">*</span></label>
+                        <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Gusmayeni, S.Kom., M.Kom." required>
+                    </div>
+                </div>
 
-            <!-- Pilih Mata Kuliah yang Diampu Dosen -->
-            <div class="form-group">
-                <label>Pilih Mata Kuliah yang Diampu Dosen Ini</label>
-                <div style="max-height: 140px; overflow-y: auto; border: 1.5px solid var(--border-line); border-radius: 10px; padding: 10px; background: #FAFBFD">
-                    @foreach($mataKuliahList as $mk)
-                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer">
-                            <input type="checkbox" name="mata_kuliah_ids[]" value="{{ $mk->id }}">
-                            <span><strong>{{ $mk->kode_mk }}</strong> &bull; {{ $mk->nama_mk }} ({{ $mk->sks }} SKS - {{ $mk->sks == 3 ? '21' : '14' }} Pertemuan)</span>
-                        </label>
-                    @endforeach
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Gelar Khusus</label>
+                        <input type="text" name="gelar" class="form-control" placeholder="Contoh: M.Kom.">
+                    </div>
+                    <div class="form-group">
+                        <label>Password Akun Dosen <span style="color: red">*</span></label>
+                        <input type="password" name="password" class="form-control" value="dosen123" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>No. Telepon / WhatsApp</label>
+                        <input type="text" name="no_telp" class="form-control" placeholder="Contoh: 081234567890">
+                    </div>
+                    <div class="form-group">
+                        <label>Email (Opsional)</label>
+                        <input type="email" name="email" class="form-control" placeholder="default: nama@unpam.ac.id">
+                    </div>
+                </div>
+
+                <!-- Pilih Mata Kuliah yang Diampu Dosen -->
+                <div class="form-group">
+                    <label>Pilih Mata Kuliah yang Diampu Dosen Ini</label>
+                    <div style="max-height: 130px; overflow-y: auto; border: 1.5px solid var(--border-line); border-radius: 10px; padding: 10px; background: #FAFBFD">
+                        @foreach($mataKuliahList as $mk)
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer">
+                                <input type="checkbox" name="mata_kuliah_ids[]" value="{{ $mk->id }}">
+                                <span><strong>{{ $mk->kode_mk }}</strong> &bull; {{ $mk->nama_mk }} ({{ $mk->sks }} SKS)</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Plot ke Ruang Kelas</label>
+                    <select name="kelas_id" class="form-control">
+                        <option value="">-- Pilih Ruang Kelas Perkuliahan --</option>
+                        @foreach($kelasList as $k)
+                            <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }} - Semester {{ $k->semester }})</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Plot ke Kelas</label>
-                <select name="kelas_id" class="form-control">
-                    <option value="">-- Pilih Kelas Perkuliahan --</option>
-                    @foreach($kelasList as $k)
-                        <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }} - Semester {{ $k->semester }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-buat-dosen').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Buat Akun Dosen</button>
             </div>
@@ -185,42 +200,57 @@
 
 <!-- Modal 2: Buat Akun Mahasiswa Baru -->
 <div id="modal-buat-mahasiswa" class="modal-backdrop" style="display: none">
-    <div class="modal-box" style="max-width: 520px">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Buat Akun Mahasiswa Baru</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px">Data akun mahasiswa akan otomatis dikelompokkan ke kelas yang dipilih.</p>
+    <div class="modal-box" style="max-width: 600px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Buat Akun Mahasiswa Baru</h3>
+                <button type="button" onclick="document.getElementById('modal-buat-mahasiswa').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Data akun mahasiswa akan otomatis dikelompokkan ke ruang kelas yang dipilih.</p>
+        </div>
 
-        <form action="{{ route('admin.mahasiswa.store') }}" method="POST">
+        <form action="{{ route('admin.mahasiswa.store') }}" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
-            <div class="form-group">
-                <label>NIM (Username Login Mahasiswa)</label>
-                <input type="text" name="nim" class="form-control" placeholder="Contoh: 2211012" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Lengkap</label>
-                <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Rian Hidayat" required>
-            </div>
-            <div class="form-group">
-                <label>Pilih Kelas Mahasiswa</label>
-                <select name="kelas_id" class="form-control" required>
-                    @foreach($kelasList as $k)
-                        <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }} - Semester {{ $k->semester }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Password Akun</label>
-                <input type="password" name="password" class="form-control" value="mhs12345" required>
-            </div>
-            <div class="form-group">
-                <label>No. Telepon / WhatsApp (Opsional)</label>
-                <input type="text" name="no_telp" class="form-control" placeholder="Contoh: 081298765432">
-            </div>
-            <div class="form-group">
-                <label>Email (Opsional)</label>
-                <input type="email" name="email" class="form-control" placeholder="default: nim@mhs.unpam.ac.id">
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>NIM (Username Login Mahasiswa) <span style="color: red">*</span></label>
+                        <input type="text" name="nim" class="form-control" placeholder="Contoh: 2211012" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Lengkap <span style="color: red">*</span></label>
+                        <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Rian Hidayat" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Pilih Ruang Kelas Mahasiswa <span style="color: red">*</span></label>
+                        <select name="kelas_id" class="form-control" required>
+                            @foreach($kelasList as $k)
+                                <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }} - Semester {{ $k->semester }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Password Akun <span style="color: red">*</span></label>
+                        <input type="password" name="password" class="form-control" value="mhs12345" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>No. Telepon / WhatsApp (Opsional)</label>
+                        <input type="text" name="no_telp" class="form-control" placeholder="Contoh: 081298765432">
+                    </div>
+                    <div class="form-group">
+                        <label>Email (Opsional)</label>
+                        <input type="email" name="email" class="form-control" placeholder="default: nim@mhs.unpam.ac.id">
+                    </div>
+                </div>
             </div>
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('modal-buat-mahasiswa').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Buat Akun Mahasiswa</button>
             </div>

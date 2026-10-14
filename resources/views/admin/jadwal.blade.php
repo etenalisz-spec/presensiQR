@@ -24,7 +24,7 @@
             <thead>
                 <tr>
                     <th>MATA KULIAH</th>
-                    <th>KELAS</th>
+                    <th>RUANG KELAS</th>
                     <th>DOSEN PENGAMPU</th>
                     <th>HARI & JAM</th>
                     <th>RUANG</th>

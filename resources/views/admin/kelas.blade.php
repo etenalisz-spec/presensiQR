@@ -1,21 +1,21 @@
-@extends('layouts.app', ['title' => 'Data Kelas'])
+@extends('layouts.app', ['title' => 'Data Ruang Kelas'])
 
 @section('content')
 <div class="unpam-banner">
-    <h2>DATA KELAS PERKULIAHAN</h2>
-    <p>Kelola Data Kelas Mahasiswa Universitas Pamulang</p>
+    <h2>DATA RUANG KELAS PERKULIAHAN</h2>
+    <p>Kelola Data Ruang Kelas Mahasiswa Universitas Pamulang</p>
 </div>
 
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px">
-        <h3 class="card-title" style="margin: 0">Daftar Kelas</h3>
+        <h3 class="card-title" style="margin: 0">Daftar Ruang Kelas</h3>
         <div style="display: flex; gap: 10px">
             <button type="button" class="btn btn-outline" onclick="openDropModal('kelas')">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 Drag & Drop Import
             </button>
             <button type="button" class="btn btn-primary" onclick="document.getElementById('add-kelas-modal').style.display = 'grid'">
-                + Tambah Kelas Baru
+                + Tambah Ruang Kelas Baru
             </button>
         </div>
     </div>
@@ -25,7 +25,7 @@
             <thead>
                 <tr>
                     <th>KODE KELAS</th>
-                    <th>NAMA KELAS</th>
+                    <th>RUANG KELAS</th>
                     <th>PROGRAM STUDI</th>
                     <th>SEMESTER</th>
                     <th>TAHUN AJARAN</th>
@@ -48,7 +48,7 @@
                         <button type="button" class="btn btn-outline btn-sm" onclick="openEditKelasModal({{ $k->id }}, '{{ addslashes($k->kode_kelas) }}', '{{ addslashes($k->nama_kelas) }}', '{{ addslashes($k->prodi) }}', {{ $k->semester }}, '{{ addslashes($k->tahun_ajaran) }}')">
                             Edit
                         </button>
-                        <form action="{{ route('admin.kelas.delete', $k->id) }}" method="POST" style="display: inline" onsubmit="return confirm('Hapus kelas ini?')">
+                        <form action="{{ route('admin.kelas.delete', $k->id) }}" method="POST" style="display: inline" onsubmit="return confirm('Hapus ruang kelas ini?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-sm" style="background: #FDEBE9; color: #C2352B; border: 1px solid #F8C3BD">
@@ -65,36 +65,47 @@
 
 <!-- Modal Tambah Kelas -->
 <div id="add-kelas-modal" class="modal-backdrop" style="display: none">
-    <div class="modal-box">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Tambah Kelas Baru</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px">Masukkan data kelas perkuliahan baru.</p>
+    <div class="modal-box" style="max-width: 550px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Tambah Ruang Kelas Baru</h3>
+                <button type="button" onclick="document.getElementById('add-kelas-modal').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Masukkan data ruang kelas perkuliahan baru.</p>
+        </div>
 
-        <form action="{{ route('admin.kelas.store') }}" method="POST">
+        <form action="{{ route('admin.kelas.store') }}" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
-            <div class="form-group">
-                <label>Kode Kelas</label>
-                <input type="text" name="kode_kelas" class="form-control" placeholder="Contoh: 05SIFE003" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Kelas</label>
-                <input type="text" name="nama_kelas" class="form-control" placeholder="Contoh: 05SIFE003 / SI-5C" required>
-            </div>
-            <div class="form-group">
-                <label>Program Studi</label>
-                <input type="text" name="prodi" class="form-control" value="Sistem Informasi" required>
-            </div>
-            <div class="form-group">
-                <label>Semester</label>
-                <input type="number" name="semester" class="form-control" value="5" min="1" max="8" required>
-            </div>
-            <div class="form-group">
-                <label>Tahun Ajaran</label>
-                <input type="text" name="tahun_ajaran" class="form-control" value="GANJIL 2026/2027" required>
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Kode Kelas <span style="color: red">*</span></label>
+                        <input type="text" name="kode_kelas" class="form-control" placeholder="Contoh: 05SIFE003" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ruang Kelas <span style="color: red">*</span></label>
+                        <input type="text" name="nama_kelas" class="form-control" placeholder="Contoh: 05SIFE003 / SI-5C" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Program Studi <span style="color: red">*</span></label>
+                    <input type="text" name="prodi" class="form-control" value="Sistem Informasi" required>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Semester <span style="color: red">*</span></label>
+                        <input type="number" name="semester" class="form-control" value="5" min="1" max="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tahun Ajaran <span style="color: red">*</span></label>
+                        <input type="text" name="tahun_ajaran" class="form-control" value="GANJIL 2026/2027" required>
+                    </div>
+                </div>
             </div>
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('add-kelas-modal').style.display = 'none'">Batal</button>
-                <button type="submit" class="btn btn-primary">Simpan Kelas</button>
+                <button type="submit" class="btn btn-primary">Simpan Ruang Kelas</button>
             </div>
         </form>
     </div>
@@ -102,33 +113,46 @@
 
 <!-- Modal Edit Kelas -->
 <div id="edit-kelas-modal" class="modal-backdrop" style="display: none">
-    <div class="modal-box">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Edit Data Kelas</h3>
-        <form id="edit-kelas-form" method="POST">
+    <div class="modal-box" style="max-width: 550px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Edit Data Ruang Kelas</h3>
+                <button type="button" onclick="document.getElementById('edit-kelas-modal').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Perbarui data ruang kelas perkuliahan.</p>
+        </div>
+
+        <form id="edit-kelas-form" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
             @method('PUT')
-            <div class="form-group">
-                <label>Kode Kelas</label>
-                <input type="text" id="ek_kode" name="kode_kelas" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Kelas</label>
-                <input type="text" id="ek_nama" name="nama_kelas" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Program Studi</label>
-                <input type="text" id="ek_prodi" name="prodi" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Semester</label>
-                <input type="number" id="ek_semester" name="semester" class="form-control" min="1" max="8" required>
-            </div>
-            <div class="form-group">
-                <label>Tahun Ajaran</label>
-                <input type="text" id="ek_tahun" name="tahun_ajaran" class="form-control" required>
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Kode Kelas <span style="color: red">*</span></label>
+                        <input type="text" id="ek_kode" name="kode_kelas" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ruang Kelas <span style="color: red">*</span></label>
+                        <input type="text" id="ek_nama" name="nama_kelas" class="form-control" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Program Studi <span style="color: red">*</span></label>
+                    <input type="text" id="ek_prodi" name="prodi" class="form-control" required>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Semester <span style="color: red">*</span></label>
+                        <input type="number" id="ek_semester" name="semester" class="form-control" min="1" max="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Tahun Ajaran <span style="color: red">*</span></label>
+                        <input type="text" id="ek_tahun" name="tahun_ajaran" class="form-control" required>
+                    </div>
+                </div>
             </div>
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('edit-kelas-modal').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </div>

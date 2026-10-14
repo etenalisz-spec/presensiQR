@@ -309,37 +309,50 @@
 
 <!-- Modal Tambah Mata Kuliah -->
 <div id="add-mk-modal" class="modal-backdrop" style="display: none">
-    <div class="modal-box">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Tambah Mata Kuliah</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px">Masukkan data mata kuliah dan tentukan bobot SKS.</p>
+    <div class="modal-box" style="max-width: 550px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Tambah Mata Kuliah</h3>
+                <button type="button" onclick="document.getElementById('add-mk-modal').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Masukkan data mata kuliah dan tentukan bobot SKS.</p>
+        </div>
 
-        <form action="{{ route('admin.matakuliah.store') }}" method="POST">
+        <form action="{{ route('admin.matakuliah.store') }}" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
-            <div class="form-group">
-                <label>Kode Mata Kuliah</label>
-                <input type="text" name="kode_mk" class="form-control" placeholder="Contoh: 22SIF0350" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Mata Kuliah</label>
-                <input type="text" name="nama_mk" class="form-control" placeholder="Contoh: KEAMANAN SISTEM INFORMASI" required>
-            </div>
-            <div class="form-group">
-                <label>Bobot SKS</label>
-                <select name="sks" class="form-control" onchange="updateTotalPertemuanDisplay(this.value, 'add_pertemuan_display')" required>
-                    <option value="2">2 SKS (14 Pertemuan)</option>
-                    <option value="3" selected>3 SKS (21 Pertemuan)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Total Pertemuan Perkuliahan (Otomatis)</label>
-                <input type="text" id="add_pertemuan_display" class="form-control" value="21 Pertemuan" readonly style="background: #F1F5F9; font-weight: 800; color: #0284C7">
-            </div>
-            <div class="form-group">
-                <label>Semester</label>
-                <input type="number" name="semester" class="form-control" value="5" min="1" max="8" required>
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Kode Mata Kuliah <span style="color: red">*</span></label>
+                        <input type="text" name="kode_mk" class="form-control" placeholder="Contoh: 22SIF0350" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Bobot SKS <span style="color: red">*</span></label>
+                        <select name="sks" class="form-control" onchange="updateTotalPertemuanDisplay(this.value, 'add_pertemuan_display')" required>
+                            <option value="2">2 SKS (14 Pertemuan)</option>
+                            <option value="3" selected>3 SKS (21 Pertemuan)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nama Mata Kuliah <span style="color: red">*</span></label>
+                    <input type="text" name="nama_mk" class="form-control" placeholder="Contoh: KEAMANAN SISTEM INFORMASI" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Total Pertemuan (Otomatis)</label>
+                        <input type="text" id="add_pertemuan_display" class="form-control" value="21 Pertemuan" readonly style="background: #F1F5F9; font-weight: 800; color: #0284C7">
+                    </div>
+                    <div class="form-group">
+                        <label>Semester <span style="color: red">*</span></label>
+                        <input type="number" name="semester" class="form-control" value="5" min="1" max="8" required>
+                    </div>
+                </div>
             </div>
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('add-mk-modal').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Simpan Mata Kuliah</button>
             </div>
@@ -349,36 +362,51 @@
 
 <!-- Modal Edit Mata Kuliah -->
 <div id="edit-mk-modal" class="modal-backdrop" style="display: none">
-    <div class="modal-box">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Edit Mata Kuliah</h3>
-        <form id="edit-mk-form" method="POST">
+    <div class="modal-box" style="max-width: 550px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Edit Mata Kuliah</h3>
+                <button type="button" onclick="document.getElementById('edit-mk-modal').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Perbarui data mata kuliah dan bobot SKS.</p>
+        </div>
+
+        <form id="edit-mk-form" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
             @method('PUT')
-            <div class="form-group">
-                <label>Kode Mata Kuliah</label>
-                <input type="text" id="emk_kode" name="kode_mk" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Mata Kuliah</label>
-                <input type="text" id="emk_nama" name="nama_mk" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Bobot SKS</label>
-                <select id="emk_sks" name="sks" class="form-control" onchange="updateTotalPertemuanDisplay(this.value, 'edit_pertemuan_display')" required>
-                    <option value="2">2 SKS (14 Pertemuan)</option>
-                    <option value="3">3 SKS (21 Pertemuan)</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>Total Pertemuan Perkuliahan (Otomatis)</label>
-                <input type="text" id="edit_pertemuan_display" class="form-control" value="21 Pertemuan" readonly style="background: #F1F5F9; font-weight: 800; color: #0284C7">
-            </div>
-            <div class="form-group">
-                <label>Semester</label>
-                <input type="number" id="emk_semester" name="semester" class="form-control" min="1" max="8" required>
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Kode Mata Kuliah <span style="color: red">*</span></label>
+                        <input type="text" id="emk_kode" name="kode_mk" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Bobot SKS <span style="color: red">*</span></label>
+                        <select id="emk_sks" name="sks" class="form-control" onchange="updateTotalPertemuanDisplay(this.value, 'edit_pertemuan_display')" required>
+                            <option value="2">2 SKS (14 Pertemuan)</option>
+                            <option value="3">3 SKS (21 Pertemuan)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nama Mata Kuliah <span style="color: red">*</span></label>
+                    <input type="text" id="emk_nama" name="nama_mk" class="form-control" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Total Pertemuan (Otomatis)</label>
+                        <input type="text" id="edit_pertemuan_display" class="form-control" value="21 Pertemuan" readonly style="background: #F1F5F9; font-weight: 800; color: #0284C7">
+                    </div>
+                    <div class="form-group">
+                        <label>Semester <span style="color: red">*</span></label>
+                        <input type="number" id="emk_semester" name="semester" class="form-control" min="1" max="8" required>
+                    </div>
+                </div>
             </div>
 
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('edit-mk-modal').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </div>
@@ -388,62 +416,69 @@
 
 <!-- Modal Tambah Plotting Jadwal -->
 <div id="add-jadwal-modal" class="modal-backdrop" style="display: none">
-    <div class="modal-box">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Plotting Jadwal & Dosen</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px">Tugaskan dosen ke kelas dan atur jadwal perkuliahan.</p>
+    <div class="modal-box" style="max-width: 550px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Plotting Jadwal & Dosen</h3>
+                <button type="button" onclick="document.getElementById('add-jadwal-modal').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Tugaskan dosen ke ruang kelas dan atur jadwal perkuliahan.</p>
+        </div>
 
-        <form action="{{ route('admin.jadwal.store') }}" method="POST">
+        <form action="{{ route('admin.jadwal.store') }}" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
             <input type="hidden" id="aj_mk_id" name="mata_kuliah_id">
 
-            <div class="form-group">
-                <label>Dosen Pengampu</label>
-                <select id="aj_dosen_id" name="dosen_id" class="form-control" required>
-                    @foreach($dosenList as $d)
-                        <option value="{{ $d->id }}">{{ $d->nama_lengkap }} ({{ $d->nidn }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Pilih Kelas</label>
-                <select name="kelas_id" class="form-control" required>
-                    @foreach($kelasList as $k)
-                        <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }} - {{ $k->mahasiswas_count }} Mahasiswa)</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
                 <div class="form-group">
-                    <label>Hari Perkuliahan</label>
-                    <select name="hari" class="form-control" required>
-                        <option value="Senin">Senin</option>
-                        <option value="Selasa">Selasa</option>
-                        <option value="Rabu">Rabu</option>
-                        <option value="Kamis">Kamis</option>
-                        <option value="Jumat">Jumat</option>
-                        <option value="Sabtu">Sabtu</option>
+                    <label>Dosen Pengampu <span style="color: red">*</span></label>
+                    <select id="aj_dosen_id" name="dosen_id" class="form-control" required>
+                        @foreach($dosenList as $d)
+                            <option value="{{ $d->id }}">{{ $d->nama_lengkap }} ({{ $d->nidn }})</option>
+                        @endforeach
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label>Ruang Kelas</label>
-                    <input type="text" name="ruang" class="form-control" value="V.401" required>
+                    <label>Pilih Ruang Kelas <span style="color: red">*</span></label>
+                    <select name="kelas_id" class="form-control" required>
+                        @foreach($kelasList as $k)
+                            <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }} - {{ $k->mahasiswas_count }} Mahasiswa)</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                    <div class="form-group">
+                        <label>Hari Perkuliahan <span style="color: red">*</span></label>
+                        <select name="hari" class="form-control" required>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ruang Kelas <span style="color: red">*</span></label>
+                        <input type="text" name="ruang" class="form-control" value="V.401" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                    <div class="form-group">
+                        <label>Jam Mulai <span style="color: red">*</span></label>
+                        <input type="time" name="jam_mulai" class="form-control" value="07:40" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jam Selesai <span style="color: red">*</span></label>
+                        <input type="time" name="jam_selesai" class="form-control" value="09:20" required>
+                    </div>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
-                <div class="form-group">
-                    <label>Jam Mulai</label>
-                    <input type="time" name="jam_mulai" class="form-control" value="07:40" required>
-                </div>
-                <div class="form-group">
-                    <label>Jam Selesai</label>
-                    <input type="time" name="jam_selesai" class="form-control" value="09:20" required>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('add-jadwal-modal').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Simpan Plotting</button>
             </div>
@@ -453,50 +488,59 @@
 
 <!-- Modal Edit Jadwal -->
 <div id="edit-jadwal-modal" class="modal-backdrop" style="display: none">
-    <div class="modal-box">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Edit Jadwal Perkuliahan</h3>
-        <form id="edit-jadwal-form" method="POST">
+    <div class="modal-box" style="max-width: 550px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Edit Jadwal Perkuliahan</h3>
+                <button type="button" onclick="document.getElementById('edit-jadwal-modal').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Perbarui penugasan dosen, hari, jam, atau ruang kelas.</p>
+        </div>
+
+        <form id="edit-jadwal-form" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
             @method('PUT')
-            <div class="form-group">
-                <label>Dosen Pengampu</label>
-                <select id="ej_dosen" name="dosen_id" class="form-control" required>
-                    @foreach($dosenList as $d)
-                        <option value="{{ $d->id }}">{{ $d->nama_lengkap }} ({{ $d->nidn }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
                 <div class="form-group">
-                    <label>Hari Perkuliahan</label>
-                    <select id="ej_hari" name="hari" class="form-control" required>
-                        <option value="Senin">Senin</option>
-                        <option value="Selasa">Selasa</option>
-                        <option value="Rabu">Rabu</option>
-                        <option value="Kamis">Kamis</option>
-                        <option value="Jumat">Jumat</option>
-                        <option value="Sabtu">Sabtu</option>
+                    <label>Dosen Pengampu <span style="color: red">*</span></label>
+                    <select id="ej_dosen" name="dosen_id" class="form-control" required>
+                        @foreach($dosenList as $d)
+                            <option value="{{ $d->id }}">{{ $d->nama_lengkap }} ({{ $d->nidn }})</option>
+                        @endforeach
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Ruang Kelas</label>
-                    <input type="text" id="ej_ruang" name="ruang" class="form-control" required>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                    <div class="form-group">
+                        <label>Hari Perkuliahan <span style="color: red">*</span></label>
+                        <select id="ej_hari" name="hari" class="form-control" required>
+                            <option value="Senin">Senin</option>
+                            <option value="Selasa">Selasa</option>
+                            <option value="Rabu">Rabu</option>
+                            <option value="Kamis">Kamis</option>
+                            <option value="Jumat">Jumat</option>
+                            <option value="Sabtu">Sabtu</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Ruang Kelas <span style="color: red">*</span></label>
+                        <input type="text" id="ej_ruang" name="ruang" class="form-control" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
+                    <div class="form-group">
+                        <label>Jam Mulai <span style="color: red">*</span></label>
+                        <input type="time" id="ej_mulai" name="jam_mulai" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jam Selesai <span style="color: red">*</span></label>
+                        <input type="time" id="ej_selesai" name="jam_selesai" class="form-control" required>
+                    </div>
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
-                <div class="form-group">
-                    <label>Jam Mulai</label>
-                    <input type="time" id="ej_mulai" name="jam_mulai" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Jam Selesai</label>
-                    <input type="time" id="ej_selesai" name="jam_selesai" class="form-control" required>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('edit-jadwal-modal').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </div>

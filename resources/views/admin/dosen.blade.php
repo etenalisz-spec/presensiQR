@@ -85,62 +85,77 @@
 
 <!-- Modal Tambah Akun Dosen (PERSIS SCREENSHOT 1 + PILIHAN MATA KULIAH) -->
 <div id="add-dosen-modal" class="modal-backdrop" style="display: none">
-    <div class="modal-box" style="max-width: 540px">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Tambah Akun Dosen</h3>
-        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px">Masukkan NIDN dan data profil dosen.</p>
+    <div class="modal-box" style="max-width: 600px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Tambah Akun Dosen</h3>
+                <button type="button" onclick="document.getElementById('add-dosen-modal').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Masukkan NIDN dan data profil dosen.</p>
+        </div>
 
-        <form action="{{ route('admin.dosen.store') }}" method="POST">
+        <form action="{{ route('admin.dosen.store') }}" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
-            <div class="form-group">
-                <label>NIDN</label>
-                <input type="text" name="nidn" class="form-control" placeholder="Contoh: 0412058005" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Lengkap dan Gelar</label>
-                <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Gusmayeni, S.Kom., M.Kom." required>
-            </div>
-            <div class="form-group">
-                <label>Gelar</label>
-                <input type="text" name="gelar" class="form-control" placeholder="Contoh: M.Kom.">
-            </div>
-            <div class="form-group">
-                <label>No. Telepon / WhatsApp</label>
-                <input type="text" name="no_telp" class="form-control" placeholder="Contoh: 081234567890">
-            </div>
-            <div class="form-group">
-                <label>Email (Opsional)</label>
-                <input type="email" name="email" class="form-control" placeholder="default: nama@unpam.ac.id">
-            </div>
-            <div class="form-group">
-                <label>Password Awal</label>
-                <input type="password" name="password" class="form-control" value="dosen123" required>
-            </div>
-
-            <!-- Pilih Mata Kuliah yang Diampu -->
-            <div class="form-group">
-                <label>Pilih Mata Kuliah yang Diampu Dosen Ini</label>
-                <div style="max-height: 140px; overflow-y: auto; border: 1.5px solid var(--border-line); border-radius: 10px; padding: 10px; background: #FAFBFD">
-                    @foreach($mataKuliahList as $mk)
-                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer">
-                            <input type="checkbox" name="mata_kuliah_ids[]" value="{{ $mk->id }}">
-                            <span><strong>{{ $mk->kode_mk }}</strong> &bull; {{ $mk->nama_mk }} ({{ $mk->sks }} SKS - {{ $mk->sks == 3 ? '21' : '14' }} Pertemuan)</span>
-                        </label>
-                    @endforeach
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>NIDN <span style="color: red">*</span></label>
+                        <input type="text" name="nidn" class="form-control" placeholder="Contoh: 0412058005" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Lengkap dan Gelar <span style="color: red">*</span></label>
+                        <input type="text" name="nama_lengkap" class="form-control" placeholder="Contoh: Gusmayeni, S.Kom., M.Kom." required>
+                    </div>
                 </div>
-                <small style="color: var(--text-muted)">Centang mata kuliah yang ditugaskan kepada dosen ini.</small>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Gelar</label>
+                        <input type="text" name="gelar" class="form-control" placeholder="Contoh: M.Kom.">
+                    </div>
+                    <div class="form-group">
+                        <label>Password Awal <span style="color: red">*</span></label>
+                        <input type="password" name="password" class="form-control" value="dosen123" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>No. Telepon / WhatsApp</label>
+                        <input type="text" name="no_telp" class="form-control" placeholder="Contoh: 081234567890">
+                    </div>
+                    <div class="form-group">
+                        <label>Email (Opsional)</label>
+                        <input type="email" name="email" class="form-control" placeholder="default: nama@unpam.ac.id">
+                    </div>
+                </div>
+
+                <!-- Pilih Mata Kuliah yang Diampu -->
+                <div class="form-group">
+                    <label>Pilih Mata Kuliah yang Diampu Dosen Ini</label>
+                    <div style="max-height: 130px; overflow-y: auto; border: 1.5px solid var(--border-line); border-radius: 10px; padding: 10px; background: #FAFBFD">
+                        @foreach($mataKuliahList as $mk)
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer">
+                                <input type="checkbox" name="mata_kuliah_ids[]" value="{{ $mk->id }}">
+                                <span><strong>{{ $mk->kode_mk }}</strong> &bull; {{ $mk->nama_mk }} ({{ $mk->sks }} SKS)</span>
+                            </label>
+                        @endforeach
+                    </div>
+                    <small style="color: var(--text-muted)">Centang mata kuliah yang ditugaskan kepada dosen ini.</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Plot ke Ruang Kelas</label>
+                    <select name="kelas_id" class="form-control">
+                        <option value="">-- Pilih Ruang Kelas Perkuliahan --</option>
+                        @foreach($kelasList as $k)
+                            <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }} - Semester {{ $k->semester }})</option>
+                        @endforeach
+                    </select>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Plot ke Kelas</label>
-                <select name="kelas_id" class="form-control">
-                    <option value="">-- Pilih Kelas Perkuliahan --</option>
-                    @foreach($kelasList as $k)
-                        <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }} - Semester {{ $k->semester }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('add-dosen-modal').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Simpan Dosen</button>
             </div>
@@ -150,52 +165,66 @@
 
 <!-- Modal Edit Dosen -->
 <div id="edit-dosen-modal" class="modal-backdrop" style="display: none">
-    <div class="modal-box" style="max-width: 540px">
-        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px">Edit Data Dosen</h3>
-        <form id="edit-dosen-form" method="POST">
+    <div class="modal-box" style="max-width: 600px; display: flex; flex-direction: column; max-height: calc(100dvh - 32px); padding: 0">
+        <div style="padding: 20px 24px 14px; border-bottom: 1px solid var(--border-line); position: sticky; top: 0; background: #fff; z-index: 2; border-top-left-radius: 18px; border-top-right-radius: 18px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 18px; font-weight: 700; margin: 0">Edit Data Dosen</h3>
+                <button type="button" onclick="document.getElementById('edit-dosen-modal').style.display = 'none'" style="background: none; border: none; font-size: 22px; cursor: pointer; color: var(--text-muted); line-height: 1">&times;</button>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px; margin-bottom: 0">Perbarui data profil dan penugasan dosen.</p>
+        </div>
+
+        <form id="edit-dosen-form" method="POST" style="display: flex; flex-direction: column; flex: 1; overflow-y: auto; margin: 0">
             @csrf
             @method('PUT')
-            <div class="form-group">
-                <label>NIDN</label>
-                <input type="text" id="ed_nidn" name="nidn" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Nama Lengkap dan Gelar</label>
-                <input type="text" id="ed_nama" name="nama_lengkap" class="form-control" required>
-            </div>
-            <div class="form-group">
-                <label>Gelar</label>
-                <input type="text" id="ed_gelar" name="gelar" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>No. Telepon / WhatsApp</label>
-                <input type="text" id="ed_telp" name="no_telp" class="form-control">
-            </div>
+            <div style="padding: 20px 24px; overflow-y: auto; flex: 1">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>NIDN <span style="color: red">*</span></label>
+                        <input type="text" id="ed_nidn" name="nidn" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Lengkap dan Gelar <span style="color: red">*</span></label>
+                        <input type="text" id="ed_nama" name="nama_lengkap" class="form-control" required>
+                    </div>
+                </div>
 
-            <!-- Perbarui Mata Kuliah yang Diampu -->
-            <div class="form-group">
-                <label>Pilih Mata Kuliah yang Diampu</label>
-                <div id="edit_mk_checkboxes" style="max-height: 140px; overflow-y: auto; border: 1.5px solid var(--border-line); border-radius: 10px; padding: 10px; background: #FAFBFD">
-                    @foreach($mataKuliahList as $mk)
-                        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer">
-                            <input type="checkbox" name="mata_kuliah_ids[]" value="{{ $mk->id }}" class="edit-mk-chk" data-mkid="{{ $mk->id }}">
-                            <span><strong>{{ $mk->kode_mk }}</strong> &bull; {{ $mk->nama_mk }} ({{ $mk->sks }} SKS - {{ $mk->sks == 3 ? '21' : '14' }} Pertemuan)</span>
-                        </label>
-                    @endforeach
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px">
+                    <div class="form-group">
+                        <label>Gelar</label>
+                        <input type="text" id="ed_gelar" name="gelar" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>No. Telepon / WhatsApp</label>
+                        <input type="text" id="ed_telp" name="no_telp" class="form-control">
+                    </div>
+                </div>
+
+                <!-- Perbarui Mata Kuliah yang Diampu -->
+                <div class="form-group">
+                    <label>Pilih Mata Kuliah yang Diampu</label>
+                    <div id="edit_mk_checkboxes" style="max-height: 130px; overflow-y: auto; border: 1.5px solid var(--border-line); border-radius: 10px; padding: 10px; background: #FAFBFD">
+                        @foreach($mataKuliahList as $mk)
+                            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; cursor: pointer">
+                                <input type="checkbox" name="mata_kuliah_ids[]" value="{{ $mk->id }}" class="edit-mk-chk" data-mkid="{{ $mk->id }}">
+                                <span><strong>{{ $mk->kode_mk }}</strong> &bull; {{ $mk->nama_mk }} ({{ $mk->sks }} SKS)</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Plot ke Ruang Kelas</label>
+                    <select id="ed_kelas" name="kelas_id" class="form-control">
+                        <option value="">-- Tetap / Pilih Ruang Kelas --</option>
+                        @foreach($kelasList as $k)
+                            <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }})</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Plot ke Kelas</label>
-                <select id="ed_kelas" name="kelas_id" class="form-control">
-                    <option value="">-- Tetap / Pilih Kelas --</option>
-                    @foreach($kelasList as $k)
-                        <option value="{{ $k->id }}">{{ $k->nama_kelas }} ({{ $k->prodi }})</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px">
+            <div style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 24px; border-top: 1px solid var(--border-line); background: #F8FAFC; position: sticky; bottom: 0; z-index: 2; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px">
                 <button type="button" class="btn btn-outline" onclick="document.getElementById('edit-dosen-modal').style.display = 'none'">Batal</button>
                 <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
             </div>
