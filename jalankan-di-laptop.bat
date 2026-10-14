@@ -7,32 +7,34 @@ echo.
 
 cd /d "%~dp0"
 
-:: 1. Cek / Aktifkan Database MySQL jika belum jalan
+:: 1. Cek Database MySQL di port 3306
 netstat -ano | findstr /R ":3306 " >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo [INFO] Mendeteksi MySQL belum aktif, mencoba menyalakan MySQL...
-    for /d %%d in ("C:\laragon\bin\mysql\mysql-*") do (
-        if exist "%%d\bin\mysqld.exe" (
-            start /B "" "%%d\bin\mysqld.exe" --defaults-file="%%d\my.ini" >nul 2>&1
-        )
+if %ERRORLEVEL% EQU 0 goto mysql_ok
+
+echo [INFO] Mendeteksi MySQL belum aktif, mencoba menyalakan MySQL...
+for /d %%d in ("C:\laragon\bin\mysql\mysql-*") do (
+    if exist "%%d\bin\mysqld.exe" (
+        start /B "" "%%d\bin\mysqld.exe" --defaults-file="%%d\my.ini" >nul 2>&1
     )
-    timeout /t 3 /nobreak >nul
 )
+timeout /t 3 /nobreak >nul
 
-:: Verifikasi status MySQL
 netstat -ano | findstr /R ":3306 " >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo ========================================================
-    echo  [PERINGATAN] Database MySQL (Port 3306) belum aktif!
-    echo  Jika aplikasi error saat dibuka, silakan buka aplikasi
-    echo  Laragon atau XAMPP dan klik "Start All" terlebih dahulu.
-    echo ========================================================
-    echo.
-) else (
-    echo [OK] Database MySQL aktif di port 3306.
-)
+if %ERRORLEVEL% EQU 0 goto mysql_ok
 
+echo.
+echo ========================================================
+echo  PERINGATAN: Database MySQL belum aktif di port 3306!
+echo  Jika terjadi error koneksi database, silakan buka
+echo  Laragon atau XAMPP dan klik "Start All".
+echo ========================================================
+echo.
+goto check_php
+
+:mysql_ok
+echo [OK] Database MySQL aktif di port 3306.
+
+:check_php
 :: 2. Prioritaskan PHP bawaan di dalam folder paket ini
 if exist "%~dp0php\php.exe" (
     set "PHP_BIN=%~dp0php\php.exe"
