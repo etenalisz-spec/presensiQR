@@ -70,7 +70,7 @@
                 Tanda <strong style="color: #059669; font-size: 14px">✓</strong> = Hadir &bull; 
                 Tanda <strong style="color: #DC2626; font-size: 14px">✗</strong> = Absen / Tidak Hadir &bull; 
                 Tanda <span style="color: #94A3B8">-</span> = Belum Ada Sesi &bull;
-                <span class="no-print" style="color: #0284C7; font-weight: 600"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align: -2px"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg> Klik simbol mana saja untuk edit/koreksi manual</span>
+                <span class="no-print" style="color: #0284C7; font-weight: 600">Klik tombol <strong>[Edit Absen]</strong> atau klik simbol presensi untuk koreksi manual</span>
             </p>
         </div>
         <div style="display: flex; gap: 12px; font-size: 12px; align-items: center">
@@ -83,9 +83,10 @@
         <table class="unpam-table matriks-table" style="font-size: 12.5px; border-collapse: collapse; width: 100%">
             <thead>
                 <tr style="background: #F1F5F9; border-bottom: 2px solid var(--border-line)">
-                    <th style="width: 35px; text-align: center; position: sticky; left: 0; background: #F1F5F9; z-index: 3">NO</th>
-                    <th style="width: 100px; position: sticky; left: 35px; background: #F1F5F9; z-index: 3">NIM</th>
-                    <th style="min-width: 170px; position: sticky; left: 135px; background: #F1F5F9; z-index: 3">NAMA MAHASISWA</th>
+                    <th style="width: 35px; text-align: center">NO</th>
+                    <th style="width: 95px">NIM</th>
+                    <th style="min-width: 170px">NAMA MAHASISWA</th>
+                    <th class="no-print" style="text-align: center; min-width: 120px">AKSI</th>
                     @foreach($jadwal->pertemuans as $ptm)
                         <th style="text-align: center; min-width: 58px; padding: 6px 4px" title="Pertemuan {{ $ptm->pertemuan_ke }} ({{ $ptm->tanggal_jadwal ? \Carbon\Carbon::parse($ptm->tanggal_jadwal)->format('d/m/Y') : '-' }})">
                             <div style="font-weight: 800; color: #1E293B">P{{ $ptm->pertemuan_ke }}</div>
@@ -102,10 +103,16 @@
             <tbody>
                 @forelse($rekapMahasiswa as $idx => $rm)
                 <tr style="border-bottom: 1px solid var(--border-line)">
-                    <td style="text-align: center; font-weight: 600; position: sticky; left: 0; background: #fff; z-index: 2">{{ $idx + 1 }}</td>
-                    <td style="font-weight: 700; color: #0284C7; position: sticky; left: 35px; background: #fff; z-index: 2">{{ $rm['mahasiswa']->nim }}</td>
-                    <td style="font-weight: 700; white-space: nowrap; position: sticky; left: 135px; background: #fff; z-index: 2; cursor: pointer" onclick="showMhsDetail({{ $idx }})" title="Klik untuk lihat rincian pertemuan">
-                        <span style="color: #1E293B; text-decoration: underline dotted #94A3B8">{{ $rm['mahasiswa']->nama_lengkap }}</span>
+                    <td style="text-align: center; font-weight: 600">{{ $idx + 1 }}</td>
+                    <td style="font-weight: 700; color: #0284C7">{{ $rm['mahasiswa']->nim }}</td>
+                    <td style="font-weight: 700; white-space: nowrap">
+                        <span style="color: #1E293B">{{ $rm['mahasiswa']->nama_lengkap }}</span>
+                    </td>
+                    <td class="no-print" style="text-align: center; padding: 5px 8px; white-space: nowrap">
+                        <button type="button" class="btn btn-outline btn-sm" style="font-size: 11.5px; padding: 4px 10px; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 5px; color: var(--unpam-blue); border-color: var(--unpam-blue); background: #EFF6FF" onclick="showMhsDetail({{ $idx }})" title="Koreksi presensi untuk seluruh pertemuan">
+                            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                            Edit Absen
+                        </button>
                     </td>
                     @foreach($jadwal->pertemuans as $ptm)
                         @php
@@ -132,7 +139,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="{{ count($jadwal->pertemuans) + 6 }}" style="text-align: center; padding: 24px; color: var(--text-muted)">
+                    <td colspan="{{ count($jadwal->pertemuans) + 7 }}" style="text-align: center; padding: 24px; color: var(--text-muted)">
                         Belum ada mahasiswa yang terdaftar di ruang kelas ini.
                     </td>
                 </tr>
