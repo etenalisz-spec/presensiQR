@@ -81,6 +81,7 @@ Route::middleware(['auth', 'role:dosen'])->prefix('dosen')->name('dosen.')->grou
 
     Route::get('/pertemuan/{pertemuan_id}/presensi', [DosenController::class, 'presensi'])->name('presensi');
     Route::post('/presensi/{presensi_id}/manual', [DosenController::class, 'updatePresensiManual'])->name('presensi.manual');
+    Route::post('/presensi/quick-update', [DosenController::class, 'quickUpdatePresensi'])->name('presensi.quickUpdate');
 
     // Menu Data Mahasiswa Berjenjang
     Route::get('/data-mahasiswa', [DosenController::class, 'dataMahasiswaMatkul'])->name('mhs.matakuliah');

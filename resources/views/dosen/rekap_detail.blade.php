@@ -66,7 +66,12 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px">
         <div>
             <h3 class="card-title" style="margin: 0; font-size: 16px">Matriks Kehadiran Menyamping (Pertemuan 1 s/d {{ count($jadwal->pertemuans) }})</h3>
-            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 3px">Tanda <strong style="color: #059669; font-size: 14px">✓</strong> = Hadir &bull; Tanda <strong style="color: #DC2626; font-size: 14px">✗</strong> = Absen / Tidak Hadir &bull; Tanda <span style="color: #94A3B8">-</span> = Belum Ada Sesi</p>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 3px">
+                Tanda <strong style="color: #059669; font-size: 14px">✓</strong> = Hadir &bull; 
+                Tanda <strong style="color: #DC2626; font-size: 14px">✗</strong> = Absen / Tidak Hadir &bull; 
+                Tanda <span style="color: #94A3B8">-</span> = Belum Ada Sesi &bull;
+                <span class="no-print" style="color: #0284C7; font-weight: 600"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="vertical-align: -2px"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg> Klik simbol mana saja untuk edit/koreksi manual</span>
+            </p>
         </div>
         <div style="display: flex; gap: 12px; font-size: 12px; align-items: center">
             <span style="display: inline-flex; align-items: center; gap: 4px"><strong style="color: #059669; font-size: 15px">✓</strong> = Hadir</span>
@@ -99,19 +104,23 @@
                 <tr style="border-bottom: 1px solid var(--border-line)">
                     <td style="text-align: center; font-weight: 600; position: sticky; left: 0; background: #fff; z-index: 2">{{ $idx + 1 }}</td>
                     <td style="font-weight: 700; color: #0284C7; position: sticky; left: 35px; background: #fff; z-index: 2">{{ $rm['mahasiswa']->nim }}</td>
-                    <td style="font-weight: 700; white-space: nowrap; position: sticky; left: 135px; background: #fff; z-index: 2">{{ $rm['mahasiswa']->nama_lengkap }}</td>
+                    <td style="font-weight: 700; white-space: nowrap; position: sticky; left: 135px; background: #fff; z-index: 2; cursor: pointer" onclick="showMhsDetail({{ $idx }})" title="Klik untuk lihat rincian pertemuan">
+                        <span style="color: #1E293B; text-decoration: underline dotted #94A3B8">{{ $rm['mahasiswa']->nama_lengkap }}</span>
+                    </td>
                     @foreach($jadwal->pertemuans as $ptm)
                         @php
                             $prs = $rm['presensis'][$ptm->id] ?? null;
                             $st = $prs ? $prs->status : null;
                         @endphp
-                        <td style="text-align: center; padding: 6px 2px">
+                        <td class="cell-presensi" style="text-align: center; padding: 6px 2px; cursor: pointer"
+                            onclick="openQuickEditPresensi({{ $ptm->id }}, {{ $ptm->pertemuan_ke }}, '{{ $ptm->tanggal_jadwal ? \Carbon\Carbon::parse($ptm->tanggal_jadwal)->format('d/m/Y') : '-' }}', {{ $rm['mahasiswa']->id }}, '{{ addslashes($rm['mahasiswa']->nama_lengkap) }}', '{{ $rm['mahasiswa']->nim }}', '{{ $st ?? 'Belum Presensi' }}', '{{ addslashes($prs->catatan ?? '') }}')"
+                            title="Klik untuk koreksi presensi {{ $rm['mahasiswa']->nama_lengkap }} (P{{ $ptm->pertemuan_ke }})">
                             @if($st === 'Hadir')
-                                <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: #D1FAE5; color: #059669; font-weight: 900; font-size: 14px" title="Pertemuan {{ $ptm->pertemuan_ke }}: Hadir">✓</span>
+                                <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: #D1FAE5; color: #059669; font-weight: 900; font-size: 14px">✓</span>
                             @elseif($st === 'Absen')
-                                <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: #FEE2E2; color: #DC2626; font-weight: 900; font-size: 14px" title="Pertemuan {{ $ptm->pertemuan_ke }}: Absen">✗</span>
+                                <span style="display: inline-block; width: 22px; height: 22px; line-height: 22px; border-radius: 50%; background: #FEE2E2; color: #DC2626; font-weight: 900; font-size: 14px">✗</span>
                             @else
-                                <span style="color: #94A3B8; font-size: 13px" title="Pertemuan {{ $ptm->pertemuan_ke }}: Belum Ada Sesi / Belum Presensi">-</span>
+                                <span style="color: #94A3B8; font-size: 13px">-</span>
                             @endif
                         </td>
                     @endforeach
@@ -187,10 +196,82 @@
     </div>
 </div>
 
+<!-- Modal Koreksi / Edit Presensi Manual oleh Dosen -->
+<div id="quick-edit-modal" class="modal-backdrop" style="display: none">
+    <div class="modal-box" style="max-width: 480px">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px">
+            <div>
+                <h3 style="font-size: 18px; font-weight: 800; color: #1E293B; margin: 0">Koreksi Presensi Mahasiswa</h3>
+                <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 3px">Ubah status kehadiran secara manual pada lembar presensi.</p>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="closeQuickEditModal()">&times;</button>
+        </div>
+
+        <div style="background: #FAFBFD; border: 1px solid var(--border-line); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 13px">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px">
+                <span style="color: var(--text-muted)">Mahasiswa:</span>
+                <strong id="qe-nama" style="color: #0284C7"></strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px">
+                <span style="color: var(--text-muted)">NIM:</span>
+                <span id="qe-nim" style="font-family: monospace; font-weight: 700"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between">
+                <span style="color: var(--text-muted)">Pertemuan:</span>
+                <strong id="qe-ptm" style="color: #1E293B"></strong>
+            </div>
+        </div>
+
+        <form action="{{ route('dosen.presensi.quickUpdate') }}" method="POST">
+            @csrf
+            <input type="hidden" name="pertemuan_id" id="qe-pertemuan-id">
+            <input type="hidden" name="mahasiswa_id" id="qe-mahasiswa-id">
+
+            <div class="form-group" style="margin-bottom: 16px">
+                <label style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #334155">Pilih Status Presensi :</label>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px">
+                    <label style="border: 1.5px solid #059669; border-radius: 8px; padding: 10px 4px; text-align: center; cursor: pointer; background: #F0FDF4; display: block">
+                        <input type="radio" name="status" value="Hadir" id="qe-status-hadir" style="margin-right: 4px" required>
+                        <strong style="color: #059669; font-size: 13px">Hadir (✓)</strong>
+                    </label>
+                    <label style="border: 1.5px solid #DC2626; border-radius: 8px; padding: 10px 4px; text-align: center; cursor: pointer; background: #FEF2F2; display: block">
+                        <input type="radio" name="status" value="Absen" id="qe-status-absen" style="margin-right: 4px">
+                        <strong style="color: #DC2626; font-size: 13px">Absen (✗)</strong>
+                    </label>
+                    <label style="border: 1.5px solid #94A3B8; border-radius: 8px; padding: 10px 4px; text-align: center; cursor: pointer; background: #F8FAFC; display: block">
+                        <input type="radio" name="status" value="Belum Presensi" id="qe-status-belum" style="margin-right: 4px">
+                        <strong style="color: #64748B; font-size: 13px">Belum (-)</strong>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 18px">
+                <label for="qe-catatan" style="display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #334155">Catatan / Alasan (Opsional) :</label>
+                <input type="text" id="qe-catatan" name="catatan" class="form-control" placeholder="Contoh: Izin surat dokter, hadir terlambat, dll">
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid var(--border-line); padding-top: 14px">
+                <button type="button" class="btn btn-outline" onclick="closeQuickEditModal()">Batal</button>
+                <button type="submit" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @push('scripts')
 <style>
+.cell-presensi {
+    transition: background-color 0.12s ease, transform 0.12s ease;
+}
+.cell-presensi:hover {
+    background-color: #E0F2FE !important;
+    transform: scale(1.08);
+}
 @media print {
-    .no-print, header, aside, .unpam-banner, .float-back-btn, .sidebar-backdrop {
+    .no-print, header, aside, .unpam-banner, .float-back-btn, .sidebar-backdrop, .modal-backdrop {
         display: none !important;
     }
     main.main-content {
@@ -232,6 +313,7 @@
         pertemuans.forEach(ptm => {
             const prs = item.presensis[ptm.id];
             const status = prs ? prs.status : 'Belum Presensi';
+            const catatan = (prs && prs.catatan) ? prs.catatan : '';
             let badgeClass = 'badge-warning';
             let statusText = 'Belum Presensi';
 
@@ -243,13 +325,23 @@
                 statusText = 'Absen (✗)';
             }
 
+            const ptmTgl = ptm.tanggal_jadwal || '-';
+            const safeNama = item.mahasiswa.nama_lengkap.replace(/'/g, "\\'");
+            const safeCatatan = catatan.replace(/'/g, "\\'");
+
             html += `
-                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: 1px solid var(--border-line); border-radius: 10px; background: #fff">
-                    <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border: 1px solid var(--border-line); border-radius: 10px; background: #fff; gap: 8px">
+                    <div style="flex: 1">
                         <strong style="font-size: 13.5px; color: #1E293B">Pertemuan Ke - ${ptm.pertemuan_ke}</strong>
-                        <div style="font-size: 12px; color: var(--text-muted)">${ptm.tanggal_jadwal || '-'} • ${ptm.jenis_pertemuan} ${ptm.tema ? '• ' + ptm.tema : ''}</div>
+                        <div style="font-size: 12px; color: var(--text-muted)">${ptmTgl} • ${ptm.jenis_pertemuan} ${ptm.tema ? '• ' + ptm.tema : ''}</div>
+                        ${catatan ? `<div style="font-size: 11.5px; color: #64748B; margin-top: 2px"><em>Catatan: ${catatan}</em></div>` : ''}
                     </div>
-                    <span class="badge ${badgeClass}">${statusText}</span>
+                    <div style="display: flex; align-items: center; gap: 8px">
+                        <span class="badge ${badgeClass}">${statusText}</span>
+                        <button type="button" class="btn btn-outline btn-sm" style="padding: 4px 8px; font-size: 11.5px" onclick="openQuickEditPresensi(${ptm.id}, ${ptm.pertemuan_ke}, '${ptmTgl}', ${item.mahasiswa.id}, '${safeNama}', '${item.mahasiswa.nim}', '${status}', '${safeCatatan}')">
+                            Edit
+                        </button>
+                    </div>
                 </div>
             `;
         });
@@ -260,6 +352,29 @@
 
     function closeMhsDetail() {
         document.getElementById('mhs-detail-modal').style.display = 'none';
+    }
+
+    function openQuickEditPresensi(ptmId, ptmKe, ptmTgl, mhsId, mhsNama, mhsNim, currentStatus, catatan) {
+        document.getElementById('qe-pertemuan-id').value = ptmId;
+        document.getElementById('qe-mahasiswa-id').value = mhsId;
+        document.getElementById('qe-nama').textContent = mhsNama;
+        document.getElementById('qe-nim').textContent = mhsNim;
+        document.getElementById('qe-ptm').textContent = `Pertemuan ${ptmKe} (${ptmTgl})`;
+        document.getElementById('qe-catatan').value = catatan || '';
+
+        if (currentStatus === 'Hadir') {
+            document.getElementById('qe-status-hadir').checked = true;
+        } else if (currentStatus === 'Absen') {
+            document.getElementById('qe-status-absen').checked = true;
+        } else {
+            document.getElementById('qe-status-belum').checked = true;
+        }
+
+        document.getElementById('quick-edit-modal').style.display = 'grid';
+    }
+
+    function closeQuickEditModal() {
+        document.getElementById('quick-edit-modal').style.display = 'none';
     }
 
     // Chart Keseluruhan Kelas

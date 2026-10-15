@@ -203,6 +203,44 @@ class DosenController extends Controller
         return back()->with('success', "Status presensi {$presensi->mahasiswa->nama_lengkap} berhasil diperbarui.");
     }
 
+    public function quickUpdatePresensi(Request $request)
+    {
+        $request->validate([
+            'pertemuan_id' => 'required|exists:pertemuans,id',
+            'mahasiswa_id' => 'required|exists:mahasiswas,id',
+            'status' => 'required|in:Hadir,Absen,Belum Presensi',
+            'catatan' => 'nullable|string',
+        ]);
+
+        $presensi = Presensi::firstOrCreate(
+            [
+                'pertemuan_id' => $request->pertemuan_id,
+                'mahasiswa_id' => $request->mahasiswa_id
+            ],
+            [
+                'status' => 'Belum Presensi'
+            ]
+        );
+
+        $presensi->update([
+            'status' => $request->status,
+            'waktu_presensi' => $request->status === 'Hadir' ? Carbon::now() : null,
+            'metode' => 'Manual Dosen',
+            'catatan' => $request->catatan ?: 'Diperbarui manual melalui Rekap Presensi',
+        ]);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Presensi {$presensi->mahasiswa->nama_lengkap} berhasil diubah menjadi {$request->status}.",
+                'status' => $request->status,
+                'presensi_id' => $presensi->id,
+            ]);
+        }
+
+        return back()->with('success', "Status presensi {$presensi->mahasiswa->nama_lengkap} pertemuan ke-{$presensi->pertemuan->pertemuan_ke} berhasil diperbarui menjadi {$request->status}.");
+    }
+
     // --- 5. MENU DATA MAHASISWA (BERJENJANG) ---
     public function dataMahasiswaMatkul()
     {
