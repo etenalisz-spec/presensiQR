@@ -356,20 +356,35 @@
                 return;
             }
 
-            st.textContent = `Mengirim total ${allPayload.length} data mahasiswa dari ${files.length} file ke server...`;
+            // Chunking otomatis 500 baris per request agar selalu stabil dan cepat untuk ribuan data
+            const CHUNK_SIZE = 500;
+            const totalItems = allPayload.length;
+            let successTotal = 0;
 
-            const res = await fetch("/admin/import/" + activeEntity, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                },
-                body: JSON.stringify({ data: allPayload })
-            });
-            const resData = await res.json();
-            st.className = res.ok ? 'alert alert-success' : 'alert alert-danger';
-            st.textContent = resData.message;
-            if (res.ok) setTimeout(() => location.reload(), 1500);
+            for (let c = 0; c < totalItems; c += CHUNK_SIZE) {
+                const chunk = allPayload.slice(c, c + CHUNK_SIZE);
+                const currentEnd = Math.min(c + CHUNK_SIZE, totalItems);
+                st.textContent = `Mengirim data mahasiswa: ${currentEnd} dari ${totalItems} baris (${Math.round((currentEnd / totalItems) * 100)}%)...`;
+
+                const res = await fetch("/admin/import/" + activeEntity, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ data: chunk })
+                });
+
+                const resData = await res.json();
+                if (!res.ok) {
+                    throw new Error(resData.message || 'Gagal mengirim batch');
+                }
+                successTotal = currentEnd;
+            }
+
+            st.className = 'alert alert-success';
+            st.textContent = `Berhasil! Seluruh ${totalItems} data mahasiswa berhasil di-import ke sistem.`;
+            setTimeout(() => location.reload(), 1500);
         } catch (err) {
             st.className = 'alert alert-danger';
             st.textContent = 'Gagal memproses file: ' + err.message;

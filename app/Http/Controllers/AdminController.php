@@ -590,9 +590,15 @@ class AdminController extends Controller
 
             switch ($entity) {
                 case 'mahasiswa':
+                    @set_time_limit(300);
+                    @ini_set('memory_limit', '512M');
+
                     $defaultPasswordHash = Hash::make('mhs12345');
                     $allKelas = Kelas::all();
                     $defaultKelas = $allKelas->first();
+
+                    // Pre-cache jadwal dan sesi pertemuan per kelas agar tidak N+1 query
+                    $jadwalsByKelas = JadwalKuliah::with('pertemuans')->get()->groupBy('kelas_id');
 
                     $nims = [];
                     foreach ($data as $item) {
@@ -602,6 +608,11 @@ class AdminController extends Controller
 
                     $existingUsers = User::whereIn('username', $nims)->get()->keyBy('username');
                     $existingMahasiswas = Mahasiswa::whereIn('nim', $nims)->get()->keyBy('nim');
+                    // Pre-cache email untuk deteksi duplikat instan di memori (O(1))
+                    $existingEmails = User::pluck('email')->flip()->toArray();
+
+                    $now = \Carbon\Carbon::now();
+                    $presensiBatch = [];
 
                     foreach ($data as $item) {
                         $nim = trim($item['nim'] ?? $item['username'] ?? $item['no_induk'] ?? '');
@@ -646,10 +657,10 @@ class AdminController extends Controller
                         // Buat User Akun
                         $user = $existingUsers->get($nim);
                         if (!$user) {
-                            $emailConflict = User::where('email', $email)->exists();
-                            if ($emailConflict) {
+                            if (isset($existingEmails[$email])) {
                                 $email = strtolower($nim) . '.' . rand(10, 99) . '@mhs.unpam.ac.id';
                             }
+                            $existingEmails[$email] = true;
 
                             $user = User::create([
                                 'name' => $nama,
@@ -674,17 +685,22 @@ class AdminController extends Controller
                             ]);
                             $existingMahasiswas->put($nim, $mhs);
 
-                            // Hubungkan ke sesi presensi kelas
-                            if ($kelas) {
-                                $jadwals = JadwalKuliah::where('kelas_id', $kelas->id)->with('pertemuans')->get();
-                                foreach ($jadwals as $jadwal) {
+                            // Hubungkan ke sesi presensi kelas secara bulk batching
+                            if ($kelas && isset($jadwalsByKelas[$kelas->id])) {
+                                foreach ($jadwalsByKelas[$kelas->id] as $jadwal) {
                                     foreach ($jadwal->pertemuans as $ptm) {
-                                        Presensi::firstOrCreate([
+                                        $presensiBatch[] = [
                                             'pertemuan_id' => $ptm->id,
                                             'mahasiswa_id' => $mhs->id,
-                                        ], [
                                             'status' => 'Belum Presensi',
-                                        ]);
+                                            'created_at' => $now,
+                                            'updated_at' => $now,
+                                        ];
+
+                                        if (count($presensiBatch) >= 1000) {
+                                            Presensi::insertOrIgnore($presensiBatch);
+                                            $presensiBatch = [];
+                                        }
                                     }
                                 }
                             }
@@ -692,6 +708,10 @@ class AdminController extends Controller
                         } else {
                             $skipped++;
                         }
+                    }
+
+                    if (!empty($presensiBatch)) {
+                        Presensi::insertOrIgnore($presensiBatch);
                     }
                     break;
 
