@@ -221,9 +221,9 @@
 
         <div id="drop-zone" style="border: 2px dashed var(--unpam-blue); border-radius: 14px; padding: 36px 20px; text-align: center; background: #F8FAFC; cursor: pointer; transition: background 0.15s">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--unpam-blue)" stroke-width="1.8" style="margin: 0 auto 10px; display: block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <strong style="color: #1E293B; display: block; font-size: 14px">Tarik file ke sini atau klik untuk memilih file</strong>
-            <small style="color: var(--text-muted); display: block; margin-top: 4px">Format yang didukung: .json, .csv</small>
-            <input type="file" id="drop-file-input" accept=".json,.csv" style="display: none">
+            <strong style="color: #1E293B; display: block; font-size: 14px">Tarik satu atau beberapa file ke sini atau klik untuk memilih file</strong>
+            <small style="color: var(--text-muted); display: block; margin-top: 4px">Format yang didukung: .json, .csv (Bisa langsung pilih banyak file)</small>
+            <input type="file" id="drop-file-input" accept=".json,.csv" multiple style="display: none">
         </div>
 
         <div id="drop-status" style="margin-top: 14px; font-size: 13px; display: none"></div>
@@ -262,10 +262,10 @@
     dropZone.ondrop = (e) => {
         e.preventDefault();
         dropZone.style.background = '#F8FAFC';
-        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
     };
     fileInput.onchange = () => {
-        if (fileInput.files.length) handleFile(fileInput.files[0]);
+        if (fileInput.files.length) handleFiles(fileInput.files);
     };
 
     function parseCSV(text) {
@@ -318,49 +318,62 @@
         return result;
     }
 
-    function handleFile(file) {
+    async function handleFiles(files) {
         const st = document.getElementById('drop-status');
         st.style.display = 'block';
         st.className = 'alert alert-info';
-        st.textContent = 'Membaca dan memproses file, mohon tunggu sebentar...';
+        st.textContent = `Membaca ${files.length} file yang dipilih...`;
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            let content = e.target.result;
-            let payload = [];
-            try {
-                if (file.name.endsWith('.json')) {
+        let allPayload = [];
+
+        try {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                st.textContent = `Membaca file (${i + 1}/${files.length}): ${file.name}...`;
+
+                const content = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(new Error('Gagal membaca ' + file.name));
+                    reader.readAsText(file);
+                });
+
+                let payload = [];
+                if (file.name.toLowerCase().endsWith('.json')) {
                     payload = JSON.parse(content);
                 } else {
                     payload = parseCSV(content);
                 }
 
-                if (!payload || payload.length === 0) {
-                    st.className = 'alert alert-danger';
-                    st.textContent = 'File kosong atau baris data tidak terbaca.';
-                    return;
+                if (Array.isArray(payload)) {
+                    allPayload = allPayload.concat(payload);
                 }
-
-                st.textContent = `Mengirim ${payload.length} data ke server...`;
-
-                const res = await fetch("/admin/import/" + activeEntity, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({ data: payload })
-                });
-                const resData = await res.json();
-                st.className = res.ok ? 'alert alert-success' : 'alert alert-danger';
-                st.textContent = resData.message;
-                if (res.ok) setTimeout(() => location.reload(), 1500);
-            } catch (err) {
-                st.className = 'alert alert-danger';
-                st.textContent = 'Gagal memproses file: ' + err.message;
             }
-        };
-        reader.readAsText(file);
+
+            if (!allPayload || allPayload.length === 0) {
+                st.className = 'alert alert-danger';
+                st.textContent = 'File kosong atau baris data tidak terbaca.';
+                return;
+            }
+
+            st.textContent = `Mengirim total ${allPayload.length} data mahasiswa dari ${files.length} file ke server...`;
+
+            const res = await fetch("/admin/import/" + activeEntity, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ data: allPayload })
+            });
+            const resData = await res.json();
+            st.className = res.ok ? 'alert alert-success' : 'alert alert-danger';
+            st.textContent = resData.message;
+            if (res.ok) setTimeout(() => location.reload(), 1500);
+        } catch (err) {
+            st.className = 'alert alert-danger';
+            st.textContent = 'Gagal memproses file: ' + err.message;
+        }
     }
 </script>
 @endpush

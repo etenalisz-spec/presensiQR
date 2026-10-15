@@ -612,9 +612,26 @@ class AdminController extends Controller
                         }
 
                         $rawKelas = trim($item['kelas'] ?? $item['nama_kelas'] ?? $item['kode_kelas'] ?? $item['rombel'] ?? '');
-                        $kelas = $allKelas->first(function ($k) use ($rawKelas) {
-                            return strcasecmp($k->nama_kelas, $rawKelas) === 0 || strcasecmp($k->kode_kelas, $rawKelas) === 0;
-                        }) ?? $defaultKelas;
+                        $kelas = null;
+                        if (!empty($rawKelas)) {
+                            $kelas = $allKelas->first(function ($k) use ($rawKelas) {
+                                return strcasecmp($k->nama_kelas, $rawKelas) === 0 || strcasecmp($k->kode_kelas, $rawKelas) === 0;
+                            });
+
+                            if (!$kelas) {
+                                $kelas = Kelas::create([
+                                    'kode_kelas' => strtoupper($rawKelas),
+                                    'nama_kelas' => strtoupper($rawKelas),
+                                    'prodi' => 'Sistem Informasi',
+                                    'semester' => 5,
+                                    'tahun_ajaran' => 'GANJIL 2026/2027',
+                                ]);
+                                $allKelas->push($kelas);
+                            }
+                        }
+                        if (!$kelas) {
+                            $kelas = $defaultKelas;
+                        }
 
                         $email = trim($item['email'] ?? $item['mail'] ?? '');
                         if (empty($email)) {
